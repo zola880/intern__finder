@@ -1,0 +1,30 @@
+{
+  "name": "intern-finder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cd frontend && npm run dev",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zola880/Intern-finder.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zola880/Intern-finder/issues"
+  },
+  "homepage": "https://github.com/zola880/Intern-finder#readme",
+  "dependencies": {
+    "groq-sdk": "^1.1.2",
+    "mongoose": "^9.3.3",
+    "next": "^16.2.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  }
+}

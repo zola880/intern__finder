@@ -1,0 +1,5 @@
+{
+  "name": "EthioIntern AI",
+  "description": "A modern platform for Ethiopian students to find internships and get AI-powered career guidance.",
+  "requestFramePermissions": ["camera", "microphone"]
+}
