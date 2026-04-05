@@ -12,65 +12,57 @@ const app = express();
 function safeRequire(modulePath, moduleName) {
   try {
     const mod = require(modulePath);
-    if (typeof mod === 'function' || (mod && typeof mod === 'object')) {
-      console.log(`✓ ${moduleName} loaded successfully`);
+    if (typeof mod === 'function' || typeof mod === 'object') {
+      console.log(`✓ ${moduleName} loaded`);
       return mod;
     } else {
-      console.warn(`⚠️ ${moduleName} is not a valid router (type: ${typeof mod})`);
-      const dummyRouter = express.Router();
-      dummyRouter.use((req, res) => res.status(501).json({ error: `${moduleName} not implemented` }));
-      return dummyRouter;
+      throw new Error("Invalid router");
     }
   } catch (err) {
-    console.error(`✗ Failed to load ${moduleName}:`, err.message);
-    const dummyRouter = express.Router();
-    dummyRouter.use((req, res) => res.status(501).json({ error: `${moduleName} not available` }));
-    return dummyRouter;
+    console.error(`✗ ${moduleName} failed:`, err.message);
+    const router = express.Router();
+    router.use((req, res) =>
+      res.status(500).json({ error: `${moduleName} not available` })
+    );
+    return router;
   }
 }
 
-// Import routes
+
+// ✅ IMPORT ROUTES
 const authRoutes = safeRequire('./routes/authRoutes', 'authRoutes');
 const profileRoutes = safeRequire('./routes/profileRoutes', 'profileRoutes');
 const internshipRoutes = safeRequire('./routes/internshipRoutes', 'internshipRoutes');
 const savedRoutes = safeRequire('./routes/savedRoutes', 'savedRoutes');
 const announcementRoutes = safeRequire('./routes/announcementRoutes', 'announcementRoutes');
 const aiRoutes = safeRequire('./routes/aiRoutes', 'aiRoutes');
-const adminApplicationRoutes = require('./routes/adminApplicationRoutes');
+const adminApplicationRoutes = safeRequire('./routes/adminApplicationRoutes', 'adminApplicationRoutes');
 
 
-// ========== ✅ CORS FIX (IMPORTANT) ==========
+// ================== ✅ CORS ==================
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: [
+    "https://intern-finder-gsrd-p6rtmedx6-zola880s-projects.vercel.app",
+    process.env.FRONTEND_URL
+  ],
   credentials: true
 }));
-// ===========================================
 
 
-// ========== ✅ HELMET (PRODUCTION SAFE) ==========
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: [
-        "'self'",
-        process.env.FRONTEND_URL || "http://localhost:3000",
-        "https://intern-finder-9p6f.onrender.com"
-      ],
-    },
-  },
-}));
-// ==============================================
+// ================== ✅ HELMET ==================
+app.use(helmet()); // keep simple (Render safe)
 
+
+// ================== ✅ BODY PARSER ==================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+// ================== ✅ STATIC ==================
 app.use('/uploads', express.static('uploads'));
 
 
-// ✅ RATE LIMITING
+// ================== ✅ RATE LIMIT ==================
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
@@ -78,7 +70,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 
-// Routes
+// ================== ✅ ROUTES ==================
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/internships', internshipRoutes);
@@ -88,18 +80,30 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/admin-applications', adminApplicationRoutes);
 
 
-// ✅ HEALTH CHECK (single)
+// ================== ✅ HEALTH ==================
+app.get('/', (req, res) => {
+  res.send("API is running...");
+});
+
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date() });
+  res.json({ status: 'ok' });
 });
 
 
-// ✅ DATABASE CONNECTION
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+// ================== ✅ DB CONNECTION ==================
+mongoose.connect(process.env.MONGO_URI, {
+  serverSelectionTimeoutMS: 5000
+})
+.then(() => console.log('✅ MongoDB connected'))
+.catch(err => {
+  console.error('❌ MongoDB error:', err.message);
+  process.exit(1);
+});
 
 
-// ✅ START SERVER
+// ================== ✅ START SERVER ==================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
