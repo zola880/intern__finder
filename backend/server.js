@@ -40,14 +40,13 @@ const adminApplicationRoutes = safeRequire('./routes/adminApplicationRoutes', 'a
 
 
 // ================== ✅ CORS ==================
+const cors = require("cors");
+
 app.use(cors({
-  origin: [
-    "https://intern-finder-gsrd-p6rtmedx6-zola880s-projects.vercel.app",
-    process.env.FRONTEND_URL
-  ],
+  origin: "https://intern-finder-eoul.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
-
 
 // ================== ✅ HELMET ==================
 app.use(helmet()); // keep simple (Render safe)
