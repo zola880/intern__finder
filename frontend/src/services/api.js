@@ -36,7 +36,7 @@ api.interceptors.response.use(
         }
       }
     }
-    return Promise.reject(error);//n
+    return Promise.reject(error);
   }
 );
 
