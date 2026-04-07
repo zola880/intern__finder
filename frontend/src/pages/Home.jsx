@@ -1,10 +1,25 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { INTERNSHIPS } from "../data/internships";
+import api from "../services/api";
 import InternshipCard from "../components/InternshipCard";
 
 const Home = () => {
-  const featuredInternships = INTERNSHIPS.filter(i => i.status === "Open").slice(0, 3);
+  const [featuredInternships, setFeaturedInternships] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const { data } = await api.get("/internships?limit=3&status=Open");
+        setFeaturedInternships(data.data);
+      } catch (err) {
+        console.error("Failed to fetch featured internships:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
 
   return (
     <div className="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white">
@@ -27,6 +42,7 @@ const Home = () => {
             Browse Internships
           </Link>
 
+          {/* AI Assistant link – points to the correct route */}
           <Link
             to="/ai-assistant"
             className="px-6 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition"
@@ -75,11 +91,21 @@ const Home = () => {
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {featuredInternships.map((internship) => (
-            <InternshipCard key={internship.id} internship={internship} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : featuredInternships.length === 0 ? (
+          <div className="text-center py-12 text-zinc-500">
+            No internships available at the moment. Check back soon!
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-6">
+            {featuredInternships.map((internship) => (
+              <InternshipCard key={internship._id} internship={internship} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* CTA */}
