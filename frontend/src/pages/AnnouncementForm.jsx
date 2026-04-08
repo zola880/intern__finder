@@ -42,7 +42,6 @@ const AnnouncementForm = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
-  // Camera capture functions
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -80,7 +79,6 @@ const AnnouncementForm = () => {
     }
   };
 
-  // AI verification
   const verifyDocument = async () => {
     if (!file) {
       setError("Please upload an acceptance letter first.");
@@ -98,7 +96,7 @@ const AnnouncementForm = () => {
       if (!response.data.passed) {
         setError("AI has determined this document may not be valid. Please upload a genuine acceptance letter.");
       } else {
-        setError(""); // clear error if valid
+        setError("");
       }
     } catch (err) {
       setError("AI verification failed. Please try again.");
@@ -117,8 +115,8 @@ const AnnouncementForm = () => {
       }
       setFileError("");
       setFile(selectedFile);
-      setVerificationResult(null); // reset AI result when new file is selected
-      setError(""); // clear any previous error
+      setVerificationResult(null);
+      setError("");
     }
   };
 
@@ -128,7 +126,6 @@ const AnnouncementForm = () => {
       setError("Please upload an acceptance letter");
       return;
     }
-    // Block submission if AI verification was done and failed
     if (verificationResult && !verificationResult.passed) {
       setError("Cannot submit: The acceptance letter appears invalid. Please upload a genuine document.");
       return;
@@ -215,33 +212,33 @@ const AnnouncementForm = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-zinc-500 hover:text-indigo-600 font-medium mb-8 transition-colors group"
+        className="flex items-center gap-2 text-zinc-500 hover:text-indigo-600 font-medium mb-6 sm:mb-8 transition-colors group"
       >
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
         Back
       </button>
 
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm">
-        <div className="p-8 bg-emerald-600 text-white flex items-center justify-between">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
+        <div className="p-5 sm:p-8 bg-emerald-600 text-white flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Internship Announcement</h1>
-            <p className="text-emerald-100 text-sm mt-1">Notify your university about your secured internship</p>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Internship Announcement</h1>
+            <p className="text-emerald-100 text-xs sm:text-sm mt-1">Notify your university about your secured internship</p>
           </div>
-          <Building2 className="w-10 h-10 text-emerald-200 opacity-50" />
+          <Building2 className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-200 opacity-50" />
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-8">
+        <form onSubmit={handleSubmit} className="p-5 sm:p-8 space-y-6 sm:space-y-8">
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-4 rounded-xl flex items-start gap-3">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-4 rounded-xl flex items-start gap-3 text-sm">
               <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Full Name</label>
               <input
@@ -249,7 +246,7 @@ const AnnouncementForm = () => {
                 type="text"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-zinc-900 dark:text-white"
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Enter your full name"
               />
             </div>
@@ -260,7 +257,7 @@ const AnnouncementForm = () => {
                 type="text"
                 value={formData.department}
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-zinc-900 dark:text-white"
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="e.g. Software Engineering"
               />
             </div>
@@ -270,7 +267,7 @@ const AnnouncementForm = () => {
                 required
                 value={formData.year}
                 onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-zinc-900 dark:text-white"
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 {["1", "2", "3", "4", "5"].map(y => <option key={y} value={y}>Year {y}</option>)}
               </select>
@@ -285,7 +282,7 @@ const AnnouncementForm = () => {
                 type="text"
                 value={formData.bankAccount}
                 onChange={(e) => setFormData({ ...formData, bankAccount: e.target.value })}
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-zinc-900 dark:text-white font-mono"
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-base font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="1000123456789 (10-16 digits)"
               />
               <p className="text-xs text-zinc-500 dark:text-zinc-400">This information is encrypted and only visible to university admins.</p>
@@ -295,7 +292,7 @@ const AnnouncementForm = () => {
           {/* Acceptance Letter */}
           <div className="space-y-2">
             <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Acceptance Letter / Recommendation</label>
-            <div className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all group cursor-pointer ${
+            <div className={`relative border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center transition-all group cursor-pointer ${
               fileError ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/50'
             }`}>
               <input
@@ -304,40 +301,39 @@ const AnnouncementForm = () => {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 accept=".pdf,.jpg,.jpeg,.png"
               />
-              <div className="flex flex-col items-center gap-3">
+              <div className="flex flex-col items-center gap-2">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
                   fileError ? 'bg-red-100 dark:bg-red-900/20' : 'bg-emerald-50 dark:bg-emerald-900/20'
                 }`}>
                   <Upload className={`w-6 h-6 ${fileError ? 'text-red-600' : 'text-emerald-600'}`} />
                 </div>
                 {file ? (
-                  <div className="flex items-center gap-2 text-emerald-600 font-bold">
+                  <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm">
                     <FileText className="w-4 h-4" />
                     {file.name}
                   </div>
                 ) : (
                   <>
-                    <p className="font-bold text-zinc-900 dark:text-white">Click to upload or drag and drop</p>
+                    <p className="font-bold text-zinc-900 dark:text-white text-sm">Click to upload or drag and drop</p>
                     <p className="text-xs text-zinc-500">PDF, PNG or JPG (max 5MB)</p>
                   </>
                 )}
                 {fileError && <p className="text-xs text-red-600">{fileError}</p>}
               </div>
             </div>
-            {/* AI Verification Button */}
-            <div className="flex justify-end mt-2">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 mt-2">
               <button
                 type="button"
                 onClick={verifyDocument}
                 disabled={!file || isVerifying}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-400 text-white rounded-xl text-sm font-bold transition-all"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-400 text-white rounded-xl text-sm font-bold transition-all w-full sm:w-auto"
               >
                 {isVerifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
                 AI Verify Document
               </button>
             </div>
             {verificationResult && (
-              <div className={`mt-3 p-3 rounded-xl text-sm ${verificationResult.passed ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200' : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200'}`}>
+              <div className={`mt-3 p-3 rounded-xl text-sm ${verificationResult.passed ? 'bg-green-50 dark:bg-green-900/20 text-green-800' : 'bg-red-50 dark:bg-red-900/20 text-red-800'}`}>
                 <p className="font-semibold">AI Analysis: {verificationResult.passed ? '✓ Likely valid' : '✗ Invalid'}</p>
                 <p className="text-xs mt-1">{verificationResult.reason}</p>
                 {!verificationResult.passed && <p className="text-xs mt-2">You cannot submit this document. Please upload a genuine acceptance letter.</p>}
@@ -356,7 +352,7 @@ const AnnouncementForm = () => {
                 <button
                   type="button"
                   onClick={startCamera}
-                  className="flex items-center justify-center gap-2 px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
+                  className="flex items-center justify-center gap-2 px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-medium hover:bg-zinc-50 transition-all w-full"
                 >
                   <Camera className="w-5 h-5" />
                   Take photo of your ID card
@@ -367,8 +363,8 @@ const AnnouncementForm = () => {
                   <video ref={videoRef} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700" autoPlay playsInline />
                   <canvas ref={canvasRef} className="hidden" />
                   <div className="flex gap-2 mt-3">
-                    <button type="button" onClick={capturePhoto} className="flex-1 bg-indigo-600 text-white py-2 rounded-lg">Capture</button>
-                    <button type="button" onClick={stopCamera} className="flex-1 border border-red-500 text-red-500 py-2 rounded-lg">Cancel</button>
+                    <button type="button" onClick={capturePhoto} className="flex-1 bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium">Capture</button>
+                    <button type="button" onClick={stopCamera} className="flex-1 border border-red-500 text-red-500 py-2 rounded-lg text-sm font-medium">Cancel</button>
                   </div>
                 </div>
               )}
@@ -378,7 +374,7 @@ const AnnouncementForm = () => {
                     <FileText className="w-5 h-5 text-emerald-600" />
                     <span className="text-sm">Student ID photo captured</span>
                   </div>
-                  <button type="button" onClick={() => setStudentIdPhoto(null)} className="text-red-500 hover:text-red-600">
+                  <button type="button" onClick={() => setStudentIdPhoto(null)} className="p-2 text-red-500 hover:text-red-600">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -387,11 +383,11 @@ const AnnouncementForm = () => {
             <p className="text-xs text-zinc-500">This helps the university admin verify your identity.</p>
           </div>
 
-          <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="pt-5 border-t border-zinc-100 dark:border-zinc-800">
             <button
               type="submit"
               disabled={isSubmitting || (verificationResult && !verificationResult.passed)}
-              className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-400 text-white rounded-2xl font-bold text-lg transition-all shadow-xl shadow-emerald-600/20 flex items-center justify-center gap-2"
+              className="w-full py-3 sm:py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-400 text-white rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg transition-all shadow-md flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>

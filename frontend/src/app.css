@@ -26,7 +26,7 @@
     @apply bg-[#0a0a0b] text-zinc-100;
   }
 
-  /* Fallback for system preference if no JS (optional) */
+  /* Fallback for system preference if JavaScript doesn't load */
   @media (prefers-color-scheme: dark) {
     body:not(.light) {
       background-color: #0a0a0b;
@@ -64,7 +64,7 @@
     @apply bg-zinc-500 dark:bg-zinc-500;
   }
 
-  /* Hide scrollbar for Chrome/Safari when not needed (optional) */
+  /* Hide scrollbar for Chrome/Safari when not needed */
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }

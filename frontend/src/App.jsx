@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "./app.css"; // <-- import your custom CSS file
 import { ProfileProvider } from "./hooks/useProfile";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -34,7 +35,7 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
-              {/* Protected routes (AI Assistant route removed – now floating button) */}
+              {/* Protected routes */}
               <Route path="/announce/:id" element={<ProtectedRoute><AnnouncementForm /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/post-internship" element={<ProtectedRoute><PostInternship /></ProtectedRoute>} />
@@ -46,7 +47,7 @@ export default function App() {
             </Routes>
           </main>
           <Footer />
-          <FloatingAIAssistant /> {/* Persistent floating button */}
+          <FloatingAIAssistant />
         </div>
       </Router>
     </ProfileProvider>
