@@ -8,9 +8,7 @@ import {
   Calendar,
   MapPin,
   Building2,
-  Zap,
   Search,
-  Send,
   MessageCircle,
   Globe,
   Facebook,
@@ -19,8 +17,10 @@ import {
   Instagram,
   ChevronRight,
   Shield,
-  TrendingUp,
+  CheckCircle,
   Users,
+  Target,
+  TrendingUp,
 } from "lucide-react";
 
 // ---------- Helper: Format Date ----------
@@ -36,24 +36,30 @@ const formatDate = (dateString) => {
 
 // ---------- Skeleton Card for Loading ----------
 const SkeletonCard = () => (
-  <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white/20 dark:border-zinc-800 p-5 animate-pulse">
+  <div 
+    className="rounded-2xl p-5 animate-pulse"
+    style={{ 
+      background: '#FFF8F2',
+      border: '1px solid #D8B8A0'
+    }}
+  >
     <div className="flex items-start justify-between">
-      <div className="w-12 h-12 bg-zinc-200 dark:bg-zinc-800 rounded-xl"></div>
-      <div className="w-16 h-6 bg-zinc-200 dark:bg-zinc-800 rounded-full"></div>
+      <div className="w-12 h-12 rounded-xl" style={{ background: '#D8B8A0' }}></div>
+      <div className="w-16 h-6 rounded-full" style={{ background: '#D8B8A0' }}></div>
     </div>
     <div className="mt-4 space-y-2">
-      <div className="h-5 bg-zinc-200 dark:bg-zinc-800 rounded w-3/4"></div>
-      <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2"></div>
+      <div className="h-5 rounded w-3/4" style={{ background: '#D8B8A0' }}></div>
+      <div className="h-4 rounded w-1/2" style={{ background: '#D8B8A0' }}></div>
       <div className="flex gap-3 mt-3">
-        <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-24"></div>
-        <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-24"></div>
+        <div className="h-4 rounded w-24" style={{ background: '#D8B8A0' }}></div>
+        <div className="h-4 rounded w-24" style={{ background: '#D8B8A0' }}></div>
       </div>
     </div>
   </div>
 );
 
-// ---------- Modern Glassmorphism Internship Card ----------
-const ModernInternshipCard = ({ internship }) => {
+// ---------- Modern Internship Card (Brown Theme) ----------
+const InternshipCard = ({ internship }) => {
   const company = internship.company || internship.employer || "Company";
   const title = internship.title || internship.position || "Internship";
   const location = internship.location || "Ethiopia";
@@ -63,56 +69,72 @@ const ModernInternshipCard = ({ internship }) => {
   const isOpen = status.toLowerCase() === "open";
 
   return (
-    <div className="group relative bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/30 dark:border-zinc-800 hover:border-indigo-300 dark:hover:border-indigo-800/60 flex flex-col overflow-hidden">
-      {/* Gradient hover effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-indigo-500/5 group-hover:via-purple-500/5 group-hover:to-pink-500/5 transition-all duration-500 pointer-events-none"></div>
-      
-      <div className="p-5 flex-1 relative z-10">
-        <div className="flex items-start justify-between">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md">
-            <Building2 size={22} />
-          </div>
-          <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-              isOpen
-                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200 dark:border-red-800"
-            }`}
-          >
-            {status}
-          </span>
+    <div 
+      className="group rounded-2xl p-5 transition-all duration-300 hover:shadow-lg flex flex-col h-full"
+      style={{ 
+        background: '#FFF8F2',
+        border: '1px solid #D8B8A0',
+        boxShadow: '0 2px 8px rgba(58, 45, 40, 0.08)'
+      }}
+    >
+      <div className="flex items-start justify-between">
+        <div 
+          className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-sm"
+          style={{ background: 'linear-gradient(135deg, #C96C4A, #A55436)' }}
+        >
+          <Building2 size={20} />
         </div>
-
-        <h3 className="text-xl font-bold mt-4 line-clamp-1 text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-          {title}
-        </h3>
-
-        <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400 text-sm mt-1">
-          <Building2 size={14} />
-          <span className="line-clamp-1">{company}</span>
-        </div>
-
-        <div className="flex flex-wrap gap-3 mt-4 text-sm text-zinc-600 dark:text-zinc-300">
-          <div className="flex items-center gap-1">
-            <MapPin size={14} className="text-zinc-400" />
-            <span>{location}</span>
-          </div>
-          {deadline && (
-            <div className="flex items-center gap-1">
-              <Calendar size={14} className="text-zinc-400" />
-              <span>Due: {formatDate(deadline)}</span>
-            </div>
-          )}
-        </div>
+        <span
+          className={`text-xs font-semibold px-3 py-1 rounded-full border ${
+            isOpen
+              ? 'text-emerald-800 border-emerald-200'
+              : 'text-red-800 border-red-200'
+          }`}
+          style={isOpen ? { background: '#ECFDF5' } : { background: '#FEF2F2' }}
+        >
+          {status}
+        </span>
       </div>
 
-      <div className="px-5 pb-5 pt-0 mt-auto relative z-10">
+      <h3 
+        className="text-lg font-bold mt-4 line-clamp-1 group-hover:opacity-90 transition-opacity"
+        style={{ color: '#3A2D28' }}
+      >
+        {title}
+      </h3>
+
+      <div className="flex items-center gap-1 text-sm mt-1 opacity-80" style={{ color: '#3A2D28' }}>
+        <Building2 size={14} />
+        <span className="line-clamp-1">{company}</span>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mt-4 text-sm opacity-90" style={{ color: '#3A2D28' }}>
+        <div className="flex items-center gap-1">
+          <MapPin size={14} />
+          <span>{location}</span>
+        </div>
+        {deadline && (
+          <div className="flex items-center gap-1">
+            <Calendar size={14} />
+            <span>Due: {formatDate(deadline)}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-auto pt-4">
         <Link
           to={`/internships/${id}`}
-          className="inline-flex items-center justify-center w-full gap-2 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-medium hover:bg-gradient-to-r hover:from-indigo-500 hover:to-indigo-600 hover:text-white transition-all duration-300 group"
+          className="inline-flex items-center justify-center w-full gap-2 py-2.5 rounded-xl font-medium transition-all duration-200"
+          style={{ 
+            background: '#C96C4A',
+            color: 'white',
+            boxShadow: '0 2px 4px rgba(201, 108, 74, 0.3)'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#A55436'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#C96C4A'}
         >
           View Details
-          <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
         </Link>
       </div>
     </div>
@@ -127,8 +149,7 @@ const Home = () => {
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const { data } = await api.get("/internships?limit=3&status=Open");
-        // Ensure we always have an array
+        const { data } = await api.get("/internships?limit=6&status=Open");
         setFeaturedInternships(data.data || []);
       } catch (err) {
         console.error("Failed to fetch featured internships:", err);
@@ -140,281 +161,487 @@ const Home = () => {
     fetchFeatured();
   }, []);
 
+  // Custom styles for the brown theme
+  const theme = {
+    bg: '#F5E6DA',
+    accent: '#C96C4A',
+    accentDark: '#A55436',
+    text: '#3A2D28',
+    textLight: '#5C4A42',
+    secondary: '#D8B8A0',
+    card: '#FFF8F2',
+    white: '#FFFFFF',
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-indigo-950/30 overflow-x-hidden">
+    <div 
+      className="min-h-screen"
+      style={{ background: theme.bg, color: theme.text }}
+    >
       
-      {/* ---------- HERO SECTION with animated gradient and floating elements ---------- */}
-      <section className="relative px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 md:pt-32 lg:pt-40 overflow-hidden">
-        {/* Animated gradient orbs */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-20 left-1/4 w-72 h-72 bg-gradient-to-r from-indigo-400/30 to-purple-400/30 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 right-10 w-80 h-80 bg-gradient-to-r from-pink-400/20 to-rose-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/3 right-1/3 w-60 h-60 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full blur-2xl animate-pulse delay-500"></div>
-        </div>
-
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          {/* Floating badge */}
-          <div className="inline-flex items-center gap-2 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md shadow-sm border border-white/40 dark:border-zinc-800 text-indigo-700 dark:text-indigo-300 px-4 py-1.5 rounded-full text-sm font-medium mb-6 animate-float">
-            <Sparkles size={16} className="text-indigo-500" />
-            <span>AI-Powered Career Platform</span>
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight">
-            Find Internships{" "}
-            <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
-              in Ethiopia
+      {/* ---------- NAVIGATION ---------- */}
+      <nav 
+        className="sticky top-0 z-50 px-4 py-3 md:px-6 md:py-4"
+        style={{ 
+          background: theme.white,
+          borderBottom: `1px solid ${theme.secondary}`,
+          boxShadow: '0 1px 4px rgba(58, 45, 40, 0.06)'
+        }}
+      >
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <Link to="/" className="flex items-center gap-2">
+            <div 
+              className="w-9 h-9 rounded-lg flex items-center justify-center shadow-sm"
+              style={{ background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentDark})` }}
+            >
+              <Briefcase size={18} color="white" />
+            </div>
+            <span className="text-xl font-bold" style={{ color: theme.text }}>
+              EthioIntern<span style={{ color: theme.accent }}>AI</span>
             </span>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-zinc-600 dark:text-zinc-300 max-w-2xl mx-auto mt-6 leading-relaxed">
-            Discover verified internship opportunities and grow your career with
-            confidence — powered by smart AI guidance.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8 sm:mt-10">
-            <Link
-              to="/internships"
-              className="group inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-full font-semibold shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-105"
+          </Link>
+          
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-8">
+            <Link to="/internships" className="font-medium hover:opacity-80 transition-opacity">Internships</Link>
+            <Link to="/ai-assistant" className="font-medium hover:opacity-80 transition-opacity">AI Tools</Link>
+            <Link to="/companies" className="font-medium hover:opacity-80 transition-opacity">Companies</Link>
+            <Link to="/about" className="font-medium hover:opacity-80 transition-opacity">About</Link>
+          </div>
+          
+          {/* Auth Buttons */}
+          <div className="flex items-center gap-3">
+            <Link 
+              to="/login" 
+              className="hidden sm:inline-flex px-4 py-2 font-medium hover:opacity-80 transition-opacity"
             >
-              Browse Internships
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition" />
+              Sign In
             </Link>
-            <Link
-              to="/ai-assistant"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border border-zinc-300 dark:border-zinc-700 rounded-full font-semibold text-zinc-800 dark:text-zinc-200 hover:bg-white dark:hover:bg-zinc-800/90 transition-all duration-300 hover:shadow-md"
+            <Link 
+              to="/signup" 
+              className="px-5 py-2.5 rounded-xl font-semibold text-white transition-all"
+              style={{ 
+                background: theme.accent,
+                boxShadow: `0 2px 6px rgba(201, 108, 74, 0.25)`
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = theme.accentDark}
+              onMouseLeave={(e) => e.currentTarget.style.background = theme.accent}
             >
-              <MessageCircle size={18} />
-              AI Assistant
+              Get Started
             </Link>
           </div>
+        </div>
+      </nav>
 
-          {/* Trust indicators with icons */}
-          <div className="flex flex-wrap justify-center gap-6 mt-12 text-sm text-zinc-600 dark:text-zinc-400">
-            <div className="flex items-center gap-2 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <Shield size={16} className="text-indigo-500" />
-              <span>Verified Opportunities</span>
+      {/* ---------- HERO SECTION ---------- */}
+      <section className="px-4 py-12 md:px-6 md:py-20 lg:py-28">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-10 items-center">
+          {/* Hero Content */}
+          <div>
+            <div 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6"
+              style={{ 
+                background: theme.card,
+                border: `1px solid ${theme.secondary}`,
+                color: theme.accent
+              }}
+            >
+              <Sparkles size={14} />
+              <span>AI-Powered Internship Platform</span>
             </div>
-            <div className="flex items-center gap-2 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <TrendingUp size={16} className="text-purple-500" />
-              <span>AI Career Coach</span>
+
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
+              Find Your Dream Internship{" "}
+              <span style={{ color: theme.accent }}>in Ethiopia</span>
+            </h1>
+
+            <p 
+              className="mt-5 text-lg leading-relaxed max-w-xl"
+              style={{ color: theme.textLight }}
+            >
+              Discover verified opportunities, get AI career guidance, and build your professional future — all in one trusted platform.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+              <Link
+                to="/internships"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-white transition-all"
+                style={{ 
+                  background: theme.accent,
+                  boxShadow: `0 4px 12px rgba(201, 108, 74, 0.3)`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = theme.accentDark;
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = theme.accent;
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                Browse Internships
+                <ArrowRight size={18} />
+              </Link>
+              <Link
+                to="/ai-assistant"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-semibold transition-all border-2"
+                style={{ 
+                  borderColor: theme.secondary,
+                  color: theme.text,
+                  background: theme.white
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = theme.card;
+                  e.currentTarget.style.borderColor = theme.accent;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = theme.white;
+                  e.currentTarget.style.borderColor = theme.secondary;
+                }}
+              >
+                <MessageCircle size={18} />
+                Try AI Assistant
+              </Link>
             </div>
-            <div className="flex items-center gap-2 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <Users size={16} className="text-pink-500" />
-              <span>Top Ethiopian Companies</span>
+
+            {/* Trust Badges */}
+            <div className="flex flex-wrap items-center gap-5 mt-10 pt-6" style={{ borderTop: `1px solid ${theme.secondary}` }}>
+              <div className="flex items-center gap-2">
+                <Shield size={18} style={{ color: theme.accent }} />
+                <span className="text-sm font-medium">Verified Listings</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle size={18} style={{ color: theme.accent }} />
+                <span className="text-sm font-medium">Free for Students</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users size={18} style={{ color: theme.accent }} />
+                <span className="text-sm font-medium">2,000+ Students</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Hero Visual - Clean Dashboard Preview */}
+          <div 
+            className="rounded-3xl p-6 shadow-xl"
+            style={{ 
+              background: theme.white,
+              border: `1px solid ${theme.secondary}`,
+              boxShadow: '0 12px 40px rgba(58, 45, 40, 0.12)'
+            }}
+          >
+            <div className="space-y-4">
+              {/* Match Card */}
+              <div 
+                className="rounded-2xl p-4"
+                style={{ background: theme.card, border: `1px solid ${theme.secondary}` }}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span 
+                        className="px-2 py-0.5 rounded-full text-xs font-semibold"
+                        style={{ background: '#ECFDF5', color: '#065F46' }}
+                      >
+                        96% Match
+                      </span>
+                    </div>
+                    <h3 className="font-bold" style={{ color: theme.text }}>Frontend Developer Intern</h3>
+                    <p className="text-sm opacity-80">TechEthio • Addis Ababa</p>
+                  </div>
+                  <Briefcase size={22} style={{ color: theme.accent }} />
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-medium" style={{ background: theme.white, border: `1px solid ${theme.secondary}` }}>React</span>
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-medium" style={{ background: theme.white, border: `1px solid ${theme.secondary}` }}>Paid</span>
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-medium" style={{ background: theme.white, border: `1px solid ${theme.secondary}` }}>Remote</span>
+                </div>
+              </div>
+
+              {/* CV Score */}
+              <div 
+                className="rounded-2xl p-4"
+                style={{ background: theme.card, border: `1px solid ${theme.secondary}` }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium opacity-80">CV Strength</span>
+                  <span className="font-bold" style={{ color: theme.accent }}>92/100</span>
+                </div>
+                <div className="w-full rounded-full h-2" style={{ background: theme.secondary }}>
+                  <div 
+                    className="h-2 rounded-full"
+                    style={{ width: '92%', background: theme.accent }}
+                  />
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  className="py-3 rounded-xl font-medium text-white transition-all"
+                  style={{ background: theme.accent }}
+                >
+                  Improve CV
+                </button>
+                <button 
+                  className="py-3 rounded-xl font-medium transition-all border"
+                  style={{ 
+                    borderColor: theme.secondary, 
+                    background: theme.white,
+                    color: theme.text
+                  }}
+                >
+                  Practice Interview
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ---------- HOW IT WORKS (interactive card steps) ---------- */}
-      <section className="px-6 py-20 sm:py-28 max-w-6xl mx-auto">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-indigo-600 dark:text-indigo-400 font-semibold text-sm uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 rounded-full inline-block">
-            Simple Process
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold mt-3">
-            How it works
-          </h2>
-          <p className="text-zinc-600 dark:text-zinc-400 mt-4">
-            Three easy steps to launch your career journey
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* ---------- STATS SECTION ---------- */}
+      <section 
+        className="px-4 py-10 md:py-14"
+        style={{ background: theme.white, borderTop: `1px solid ${theme.secondary}`, borderBottom: `1px solid ${theme.secondary}` }}
+      >
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            {
-              icon: Search,
-              title: "1. Browse",
-              desc: "Explore available internships across different fields with smart filters.",
-              gradient: "from-indigo-500 to-indigo-600",
-            },
-            {
-              icon: Send,
-              title: "2. Apply",
-              desc: "Submit your application quickly and easily with one-click apply.",
-              gradient: "from-purple-500 to-purple-600",
-            },
-            {
-              icon: Zap,
-              title: "3. Get Guidance",
-              desc: "Use AI tools to improve your chances of success and ace interviews.",
-              gradient: "from-pink-500 to-pink-600",
-            },
-          ].map((step, idx) => (
-            <div
-              key={idx}
-              className="group relative bg-white/80 dark:bg-zinc-900/60 backdrop-blur-sm rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-white/30 dark:border-zinc-800 hover:border-indigo-200 dark:hover:border-indigo-800/40 transform hover:-translate-y-1"
-            >
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${step.gradient} text-white flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                <step.icon size={28} />
+            { value: "500+", label: "Internships", icon: Briefcase },
+            { value: "120+", label: "Companies", icon: Building2 },
+            { value: "2K+", label: "Students", icon: Users },
+            { value: "85%", label: "Success Rate", icon: TrendingUp },
+          ].map((stat, i) => (
+            <div key={i} className="text-center p-4">
+              <div 
+                className="w-12 h-12 mx-auto rounded-xl flex items-center justify-center mb-3"
+                style={{ background: theme.card, border: `1px solid ${theme.secondary}` }}
+              >
+                <stat.icon size={22} style={{ color: theme.accent }} />
               </div>
-              <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                {step.desc}
-              </p>
+              <div className="text-2xl md:text-3xl font-bold" style={{ color: theme.text }}>{stat.value}</div>
+              <div className="text-sm opacity-80">{stat.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ---------- FEATURED INTERNSHIPS SECTION ---------- */}
-      <section className="px-6 py-12 sm:py-20 max-w-6xl mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <span className="text-indigo-600 dark:text-indigo-400 font-semibold text-sm uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 rounded-full inline-block">
-              Top Picks
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold mt-2">
-              Featured Internships
-            </h2>
+      {/* ---------- HOW IT WORKS ---------- */}
+      <section className="px-4 py-16 md:py-24">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">How It Works</h2>
+            <p style={{ color: theme.textLight }}>Three simple steps to launch your career</p>
           </div>
-          <Link
-            to="/internships"
-            className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium hover:gap-2 transition-all group"
-          >
-            View all
-            <ArrowRight size={16} className="group-hover:translate-x-1 transition" />
-          </Link>
-        </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <SkeletonCard key={i} />
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: Search,
+                title: "Browse Opportunities",
+                desc: "Filter internships by field, location, and requirements.",
+              },
+              {
+                icon: Target,
+                title: "Apply with Confidence",
+                desc: "Submit applications with AI-optimized CVs and cover letters.",
+              },
+              {
+                icon: Sparkles,
+                title: "Get Career Guidance",
+                desc: "Receive personalized tips and interview preparation.",
+              },
+            ].map((step, idx) => (
+              <div 
+                key={idx} 
+                className="rounded-2xl p-6 text-center transition-all hover:shadow-md"
+                style={{ 
+                  background: theme.card,
+                  border: `1px solid ${theme.secondary}`
+                }}
+              >
+                <div 
+                  className="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center mb-4"
+                  style={{ background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentDark})` }}
+                >
+                  <step.icon size={26} color="white" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{step.title}</h3>
+                <p className="text-sm opacity-80">{step.desc}</p>
+              </div>
             ))}
           </div>
-        ) : error ? (
-          <div className="text-center py-16 bg-white/50 dark:bg-zinc-900/50 rounded-2xl backdrop-blur-sm">
-            <p className="text-red-600 dark:text-red-400 font-medium">
-              Failed to load internships. Please try again later.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-full text-sm hover:bg-indigo-700 transition"
-            >
-              Retry
-            </button>
-          </div>
-        ) : featuredInternships.length === 0 ? (
-          <div className="text-center py-16 bg-white/50 dark:bg-zinc-900/50 rounded-2xl backdrop-blur-sm">
-            <p className="text-zinc-600 dark:text-zinc-400">
-              No internships available at the moment. Check back soon!
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredInternships.map((internship) => (
-              <ModernInternshipCard key={internship._id} internship={internship} />
-            ))}
-          </div>
-        )}
+        </div>
       </section>
 
-      {/* ---------- CTA SECTION with gradient and pattern ---------- */}
-      <section className="mx-6 my-16 sm:my-24">
-        <div className="max-w-5xl mx-auto bg-gradient-to-br from-indigo-600 via-purple-700 to-pink-700 rounded-3xl p-8 sm:p-12 text-center shadow-2xl relative overflow-hidden">
-          {/* Background pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl"></div>
-          </div>
-          <div className="relative z-10">
-            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3">
-              Start your career journey today
-            </h2>
-            <p className="text-indigo-100 text-base sm:text-lg max-w-xl mx-auto mb-8">
-              Join thousands of Ethiopian students finding real opportunities across the country.
-            </p>
+      {/* ---------- FEATURED INTERNSHIPS ---------- */}
+      <section className="px-4 py-12 md:py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold">Featured Internships</h2>
+              <p className="opacity-80 mt-1">Hand-picked opportunities for you</p>
+            </div>
             <Link
               to="/internships"
-              className="inline-flex items-center gap-2 bg-white text-indigo-700 px-8 py-3.5 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
+              className="inline-flex items-center gap-1 font-medium transition-opacity hover:opacity-80"
+              style={{ color: theme.accent }}
             >
-              Get Started
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition" />
+              View all <ArrowRight size={16} />
             </Link>
           </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : error ? (
+            <div 
+              className="text-center py-12 rounded-2xl"
+              style={{ background: theme.card, border: `1px solid ${theme.secondary}` }}
+            >
+              <p className="font-medium" style={{ color: '#B91C1C' }}>
+                Failed to load internships. Please try again.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 px-6 py-2 rounded-xl text-white text-sm font-medium"
+                style={{ background: theme.accent }}
+              >
+                Retry
+              </button>
+            </div>
+          ) : featuredInternships.length === 0 ? (
+            <div 
+              className="text-center py-12 rounded-2xl"
+              style={{ background: theme.card, border: `1px solid ${theme.secondary}` }}
+            >
+              <p className="opacity-80">No internships available right now. Check back soon!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {featuredInternships.map((internship) => (
+                <InternshipCard key={internship._id} internship={internship} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ---------- FOOTER (modern with gradient accents) ---------- */}
-      <footer className="border-t border-zinc-200 dark:border-zinc-800 mt-12 pt-12 pb-8 px-6 bg-white/50 dark:bg-zinc-900/30 backdrop-blur-sm">
+      {/* ---------- CTA SECTION ---------- */}
+      <section className="px-4 py-12 md:py-16">
+        <div 
+          className="max-w-4xl mx-auto rounded-3xl p-8 md:p-12 text-center"
+          style={{ 
+            background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentDark})`,
+            color: 'white'
+          }}
+        >
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">
+            Ready to Start Your Career Journey?
+          </h2>
+          <p className="opacity-90 mb-8 max-w-lg mx-auto">
+            Join thousands of Ethiopian students finding meaningful internships with EthioInternAI.
+          </p>
+          <Link
+            to="/signup"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold bg-white transition-all"
+            style={{ color: theme.accent }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            Create Free Account
+            <ArrowRight size={18} />
+          </Link>
+          <p className="text-sm opacity-80 mt-5">✓ No credit card required &nbsp; ✓ Cancel anytime</p>
+        </div>
+      </section>
+
+      {/* ---------- FOOTER ---------- */}
+      <footer 
+        className="px-4 py-12 md:py-16 mt-8"
+        style={{ 
+          background: theme.white,
+          borderTop: `1px solid ${theme.secondary}`
+        }}
+      >
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-            {/* Brand Column */}
+            {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
-                  <Briefcase size={16} className="text-white" />
+                <div 
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentDark})` }}
+                >
+                  <Briefcase size={16} color="white" />
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  EthioInternAI
+                <span className="text-lg font-bold" style={{ color: theme.text }}>
+                  EthioIntern<span style={{ color: theme.accent }}>AI</span>
                 </span>
               </div>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              <p className="text-sm opacity-80 leading-relaxed">
                 Connecting Ethiopian students with top internships and AI-driven career guidance.
               </p>
               <div className="flex gap-4 mt-5">
-                <a href="#" className="text-zinc-400 hover:text-indigo-600 transition transform hover:scale-110"><Twitter size={18} /></a>
-                <a href="#" className="text-zinc-400 hover:text-indigo-600 transition transform hover:scale-110"><Linkedin size={18} /></a>
-                <a href="#" className="text-zinc-400 hover:text-indigo-600 transition transform hover:scale-110"><Facebook size={18} /></a>
-                <a href="#" className="text-zinc-400 hover:text-indigo-600 transition transform hover:scale-110"><Instagram size={18} /></a>
+                {[Twitter, Linkedin, Facebook, Instagram].map((Icon, i) => (
+                  <a 
+                    key={i} 
+                    href="#" 
+                    className="opacity-70 hover:opacity-100 transition-opacity"
+                    style={{ color: theme.text }}
+                  >
+                    <Icon size={18} />
+                  </a>
+                ))}
               </div>
             </div>
 
-            {/* Platform Links */}
+            {/* Platform */}
             <div>
-              <h4 className="font-semibold text-lg mb-4">Platform</h4>
-              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                <li><Link to="/internships" className="hover:text-indigo-600 transition flex items-center gap-1"><ChevronRight size={14} /> Browse Internships</Link></li>
-                <li><Link to="/ai-assistant" className="hover:text-indigo-600 transition flex items-center gap-1"><ChevronRight size={14} /> AI Career Guide</Link></li>
-                <li><Link to="/profile" className="hover:text-indigo-600 transition flex items-center gap-1"><ChevronRight size={14} /> Student Profile</Link></li>
+              <h4 className="font-semibold mb-4" style={{ color: theme.text }}>Platform</h4>
+              <ul className="space-y-2 text-sm opacity-80">
+                <li><Link to="/internships" className="hover:opacity-100 transition-opacity flex items-center gap-1"><ChevronRight size={14} /> Browse Internships</Link></li>
+                <li><Link to="/ai-assistant" className="hover:opacity-100 transition-opacity flex items-center gap-1"><ChevronRight size={14} /> AI Career Tools</Link></li>
+                <li><Link to="/profile" className="hover:opacity-100 transition-opacity flex items-center gap-1"><ChevronRight size={14} /> My Profile</Link></li>
               </ul>
             </div>
 
             {/* Resources */}
             <div>
-              <h4 className="font-semibold text-lg mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                <li><a href="#" className="hover:text-indigo-600 transition flex items-center gap-1"><ChevronRight size={14} /> Career Tips</a></li>
-                <li><a href="#" className="hover:text-indigo-600 transition flex items-center gap-1"><ChevronRight size={14} /> Interview Prep</a></li>
-                <li><a href="#" className="hover:text-indigo-600 transition flex items-center gap-1"><ChevronRight size={14} /> CV Builder</a></li>
+              <h4 className="font-semibold mb-4" style={{ color: theme.text }}>Resources</h4>
+              <ul className="space-y-2 text-sm opacity-80">
+                <li><a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-1"><ChevronRight size={14} /> Career Guides</a></li>
+                <li><a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-1"><ChevronRight size={14} /> Interview Tips</a></li>
+                <li><a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-1"><ChevronRight size={14} /> CV Templates</a></li>
               </ul>
             </div>
 
             {/* Contact */}
             <div>
-              <h4 className="font-semibold text-lg mb-4">Contact</h4>
-              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                <li className="flex items-center gap-2"><Globe size={14} className="text-indigo-500" /> support@ethiointern.ai</li>
-                <li className="flex items-center gap-2"><MapPin size={14} className="text-indigo-500" /> Addis Ababa, Ethiopia</li>
+              <h4 className="font-semibold mb-4" style={{ color: theme.text }}>Contact</h4>
+              <ul className="space-y-3 text-sm opacity-80">
+                <li className="flex items-center gap-2">
+                  <Globe size={14} style={{ color: theme.accent }} />
+                  <span>support@ethiointern.ai</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <MapPin size={14} style={{ color: theme.accent }} />
+                  <span>Addis Ababa, Ethiopia</span>
+                </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-zinc-200 dark:border-zinc-800 mt-10 pt-6 text-center text-xs text-zinc-500 dark:text-zinc-500">
+          <div 
+            className="border-t pt-6 mt-10 text-center text-sm opacity-70"
+            style={{ borderColor: theme.secondary }}
+          >
             © {new Date().getFullYear()} EthioInternAI. All rights reserved. Empowering Ethiopian youth.
           </div>
         </div>
       </footer>
-
-      {/* Custom keyframes for animations */}
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-5px); }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        @keyframes gradient {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        .animate-gradient {
-          background-size: 200% auto;
-          animation: gradient 3s linear infinite;
-        }
-      `}</style>
     </div>
   );
 };
