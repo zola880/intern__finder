@@ -8,13 +8,14 @@ exports.apply = async (req, res) => {
     if (!universityName || !reason) {
       return res.status(400).json({ message: 'University name and reason are required' });
     }
-    // Check if user already has a pending application
-    const existing = await AdminApplication.findOne({ applicant: req.user._id, status: 'PENDING' });
+
+    const existing = await AdminApplication.findOne({ applicantId: req.user.id, status: 'PENDING' });
     if (existing) {
       return res.status(400).json({ message: 'You already have a pending application' });
     }
+
     const application = await AdminApplication.create({
-      applicant: req.user._id,
+      applicantId: req.user.id,
       universityName,
       reason,
     });
@@ -31,10 +32,7 @@ exports.getApplications = async (req, res) => {
       return res.status(403).json({ message: 'Admin only' });
     }
     const { status } = req.query;
-    const filter = status ? { status } : {};
-    const applications = await AdminApplication.find(filter)
-      .populate('applicant', 'fullName email')
-      .sort({ createdAt: -1 });
+    const applications = await AdminApplication.find({ status });
     res.json(applications);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -47,20 +45,23 @@ exports.approveApplication = async (req, res) => {
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({ message: 'Admin only' });
     }
-    const application = await AdminApplication.findById(req.params.id).populate('applicant');
+    const application = await AdminApplication.findById(req.params.id);
     if (!application) return res.status(404).json({ message: 'Application not found' });
     if (application.status !== 'PENDING') {
       return res.status(400).json({ message: `Application already ${application.status}` });
     }
-    // Update user role to UNIVERSITY_ADMIN and set university
-    await User.findByIdAndUpdate(application.applicant._id, {
+
+    await User.findByIdAndUpdate(application.applicant.id, {
       role: 'UNIVERSITY_ADMIN',
       university: application.universityName,
     });
-    application.status = 'APPROVED';
-    application.reviewedBy = req.user._id;
-    application.reviewedAt = new Date();
-    await application.save();
+
+    await AdminApplication.updateById(req.params.id, {
+      status: 'APPROVED',
+      reviewedBy: req.user.id,
+      reviewedAt: new Date(),
+    });
+
     res.json({ message: 'Application approved. User is now a university admin.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -79,11 +80,14 @@ exports.rejectApplication = async (req, res) => {
     if (application.status !== 'PENDING') {
       return res.status(400).json({ message: `Application already ${application.status}` });
     }
-    application.status = 'REJECTED';
-    application.adminNotes = reason || 'No reason provided';
-    application.reviewedBy = req.user._id;
-    application.reviewedAt = new Date();
-    await application.save();
+
+    await AdminApplication.updateById(req.params.id, {
+      status: 'REJECTED',
+      adminNotes: reason || 'No reason provided',
+      reviewedBy: req.user.id,
+      reviewedAt: new Date(),
+    });
+
     res.json({ message: 'Application rejected' });
   } catch (err) {
     res.status(500).json({ message: err.message });

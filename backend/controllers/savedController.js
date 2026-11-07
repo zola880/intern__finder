@@ -4,10 +4,8 @@ const Internship = require('../models/Internship');
 // GET /api/saved - list saved internships for current user
 exports.getSavedInternships = async (req, res) => {
   try {
-    const saved = await SavedInternship.find({ user: req.user._id })
-      .populate('internship')
-      .sort({ createdAt: -1 });
-    res.json(saved.map(s => s.internship));
+    const saved = await SavedInternship.find({ userId: req.user.id });
+    res.json(saved);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -22,18 +20,18 @@ exports.saveInternship = async (req, res) => {
     }
 
     const existing = await SavedInternship.findOne({
-      user: req.user._id,
-      internship: req.params.internshipId
+      userId: req.user.id,
+      internshipId: req.params.internshipId,
     });
     if (existing) {
       return res.status(400).json({ message: 'Already saved' });
     }
 
-    const saved = await SavedInternship.create({
-      user: req.user._id,
-      internship: req.params.internshipId
+    await SavedInternship.create({
+      userId: req.user.id,
+      internshipId: req.params.internshipId,
     });
-    res.status(201).json({ message: 'Saved successfully', saved });
+    res.status(201).json({ message: 'Saved successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -43,8 +41,8 @@ exports.saveInternship = async (req, res) => {
 exports.unsaveInternship = async (req, res) => {
   try {
     const result = await SavedInternship.findOneAndDelete({
-      user: req.user._id,
-      internship: req.params.internshipId
+      userId: req.user.id,
+      internshipId: req.params.internshipId,
     });
     if (!result) {
       return res.status(404).json({ message: 'Not found in saved list' });
@@ -54,4 +52,3 @@ exports.unsaveInternship = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-// new

@@ -36,15 +36,14 @@ exports.register = async (req, res) => {
       department: department || '',
     });
 
-    const { accessToken, refreshToken } = generateTokens(user._id);
-    user.refreshToken = refreshToken;
-    await user.save();
+    const { accessToken, refreshToken } = generateTokens(user.id);
+    await User.save({ id: user.id, refreshToken });
 
     res.status(201).json({
       accessToken,
       refreshToken,
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         fullName: user.fullName,
         role: user.role,
@@ -74,15 +73,14 @@ exports.login = async (req, res) => {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const { accessToken, refreshToken } = generateTokens(user._id);
-    user.refreshToken = refreshToken;
-    await user.save();
+    const { accessToken, refreshToken } = generateTokens(user.id);
+    await User.save({ id: user.id, refreshToken });
 
     res.json({
       accessToken,
       refreshToken,
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         fullName: user.fullName,
         role: user.role,
@@ -110,7 +108,7 @@ exports.refresh = async (req, res) => {
     if (!user || user.refreshToken !== refreshToken) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
-    const newAccessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    const newAccessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '15m' });
     res.json({ accessToken: newAccessToken });
   } catch (err) {
     console.error('Refresh error:', err);
@@ -126,8 +124,7 @@ exports.logout = async (req, res) => {
     if (refreshToken) {
       const user = await User.findOne({ refreshToken });
       if (user) {
-        user.refreshToken = null;
-        await user.save();
+        await User.save({ id: user.id, refreshToken: null });
       }
     }
     res.json({ message: 'Logged out successfully' });
@@ -136,4 +133,3 @@ exports.logout = async (req, res) => {
     res.status(500).json({ message: 'Server error during logout' });
   }
 };
-// new

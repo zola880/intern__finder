@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -59,14 +58,14 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
 
-// ✅ HELMET (simplified for Render)
+// ✅ HELMET
 app.use(helmet());
 
 // ✅ BODY PARSER
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ STATIC FILES (for uploaded acceptance letters)
+// ✅ STATIC FILES
 app.use('/uploads', express.static('uploads'));
 
 // ✅ RATE LIMITING
@@ -86,12 +85,12 @@ app.use('/api/admin-applications', adminApplicationRoutes);
 app.get('/', (req, res) => res.send('API is running...'));
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-// ✅ DATABASE CONNECTION
-const connectDB = require('./config/db');
-connectDB()
-  .then(() => console.log('✅ MongoDB connected'))
+// ✅ DATABASE CONNECTION (PostgreSQL)
+const pool = require('./config/db');
+pool.query('SELECT NOW()')
+  .then(() => console.log('✅ PostgreSQL connected'))
   .catch(err => {
-    console.error('❌ MongoDB error:', err.message);
+    console.error('❌ PostgreSQL error:', err.message);
     process.exit(1);
   });
 

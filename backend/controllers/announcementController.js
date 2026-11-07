@@ -3,13 +3,11 @@ const Internship = require('../models/Internship');
 const User = require('../models/User');
 const { encrypt, decrypt } = require('../services/encryptionService');
 const { uploadToCloudinary } = require('../services/fileUploadService');
-const { verifyDocuments } = require('../services/aiVerificationService'); // AI decision service
+const { verifyDocuments } = require('../services/aiVerificationService');
 
 // Helper: extract text from file (stub – replace with real OCR)
 async function extractTextFromFile(fileBuffer, mimeType) {
-  // In production: call OCR API (e.g., Tesseract, Google Vision)
-  // For now, return a dummy text based on filename
-  return "Simulated extracted text from the document.";
+  return 'Simulated extracted text from the document.';
 }
 
 // Student submits an announcement (with two optional files)
@@ -27,7 +25,6 @@ exports.createAnnouncement = async (req, res) => {
       return res.status(400).json({ message: 'Valid bank account number required (10-16 digits)' });
     }
 
-    // --- Upload files and extract text for AI ---
     let acceptanceLetterUrl = '', studentIdPhotoUrl = '';
     let acceptanceText = '', studentIdText = '';
 
@@ -45,10 +42,8 @@ exports.createAnnouncement = async (req, res) => {
       studentIdText = await extractTextFromFile(file.buffer, file.mimetype);
     }
 
-    // --- AI verification ---
     const aiResult = await verifyDocuments(acceptanceText, studentIdText, req.user, internship);
 
-    // Determine initial status based on AI verdict
     let status = 'PENDING';
     let adminNotes = '';
     if (aiResult.verdict === 'invalid') {
@@ -65,8 +60,8 @@ exports.createAnnouncement = async (req, res) => {
     const encryptedBank = encrypt(bankAccount);
 
     const announcement = await Announcement.create({
-      student: req.user._id,
-      internship: internshipId,
+      studentId: req.user.id,
+      internshipId,
       fullName,
       department,
       year,
@@ -78,7 +73,13 @@ exports.createAnnouncement = async (req, res) => {
       aiVerdict: aiResult.verdict,
       aiConfidence: aiResult.confidence,
       aiNotes: aiResult.notes,
-      statusHistory: [{ status, changedBy: req.user._id, note: adminNotes || 'Student submitted' }]
+    });
+
+    await Announcement.addStatusHistory({
+      announcementId: announcement.id,
+      status,
+      changedById: req.user.id,
+      note: adminNotes || 'Student submitted',
     });
 
     res.status(201).json(announcement);
@@ -91,10 +92,8 @@ exports.createAnnouncement = async (req, res) => {
 // Student gets their own announcements
 exports.getMyAnnouncements = async (req, res) => {
   try {
-    const announcements = await Announcement.find({ student: req.user._id })
-      .populate('internship', 'companyName field location')
-      .sort({ createdAt: -1 });
-    const safe = announcements.map(a => ({ ...a.toObject(), bankAccountEncrypted: undefined }));
+    const announcements = await Announcement.find({ studentId: req.user.id });
+    const safe = announcements.map(a => ({ ...a, bankAccountEncrypted: undefined }));
     res.json(safe);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -108,20 +107,14 @@ exports.getUniversityAnnouncements = async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    let filter = {};
-    if (req.user.role === 'UNIVERSITY_ADMIN') {
-      const students = await User.find({ university: req.user.university, role: 'STUDENT' }).select('_id');
-      const studentIds = students.map(s => s._id);
-      filter.student = { $in: studentIds };
-    }
-
-    const announcements = await Announcement.find(filter)
-      .populate('student', 'fullName email')
-      .populate('internship', 'companyName field location')
-      .sort({ createdAt: -1 });
+    const announcements = await Announcement.findByUniversity({
+      university: req.user.university,
+      role: req.user.role,
+      adminId: req.user.id,
+    });
 
     const withDecrypted = announcements.map(a => {
-      const obj = a.toObject();
+      const obj = { ...a };
       if (obj.bankAccountEncrypted) {
         try {
           obj.bankAccount = decrypt(obj.bankAccountEncrypted);
@@ -153,7 +146,7 @@ exports.updateAnnouncementStatus = async (req, res) => {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
-    const announcement = await Announcement.findById(req.params.id).populate('student');
+    const announcement = await Announcement.findById(req.params.id);
     if (!announcement) return res.status(404).json({ message: 'Announcement not found' });
 
     if (req.user.role === 'UNIVERSITY_ADMIN' && announcement.student.university !== req.user.university) {
@@ -167,22 +160,26 @@ exports.updateAnnouncementStatus = async (req, res) => {
       return res.status(400).json({ message: 'Stipend already sent, cannot change' });
     }
 
-    announcement.status = status;
-    announcement.processedAt = new Date();
-    announcement.statusHistory.push({
+    const updated = await Announcement.updateStatus(req.params.id, {
       status,
-      changedBy: req.user._id,
-      note: note || `Status changed to ${status} by ${req.user.role}`
+      processedAt: new Date(),
+      adminNotes: note || `Status changed to ${status} by ${req.user.role}`,
     });
-    await announcement.save();
 
-    res.json({ message: `Status updated to ${status}`, announcement });
+    await Announcement.addStatusHistory({
+      announcementId: req.params.id,
+      status,
+      changedById: req.user.id,
+      note: note || `Status changed to ${status} by ${req.user.role}`,
+    });
+
+    res.json({ message: `Status updated to ${status}`, announcement: updated });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Optional: standalone document verification (can be called before final submit)
+// Optional: standalone document verification
 exports.verifyDocument = async (req, res) => {
   try {
     if (req.user.role !== 'STUDENT') {
@@ -192,7 +189,6 @@ exports.verifyDocument = async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Extract text and run AI (simulate or real)
     const extractedText = await extractTextFromFile(req.file.buffer, req.file.mimetype);
     const aiResult = await verifyDocuments(extractedText, '', req.user, null);
 
@@ -201,7 +197,7 @@ exports.verifyDocument = async (req, res) => {
       confidence: aiResult.confidence,
       passed: aiResult.verdict === 'valid',
       reason: aiResult.notes,
-      message: aiResult.verdict === 'valid' ? 'Document looks valid.' : 'Document may be invalid or suspicious.'
+      message: aiResult.verdict === 'valid' ? 'Document looks valid.' : 'Document may be invalid or suspicious.',
     });
   } catch (err) {
     console.error('Verification error:', err);

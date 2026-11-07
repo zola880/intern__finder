@@ -3,8 +3,11 @@ const User = require('../models/User');
 // GET /api/profile - get current user profile
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-passwordHash -refreshToken');
-    res.json(user);
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const { passwordHash, refreshToken, ...safeUser } = user;
+    res.json(safeUser);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -22,13 +25,11 @@ exports.updateProfile = async (req, res) => {
       if (req.body[field] !== undefined) updates[field] = req.body[field];
     });
 
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      updates,
-      { new: true, runValidators: true }
-    ).select('-passwordHash -refreshToken');
+    const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    res.json(user);
+    const { passwordHash, refreshToken, ...safeUser } = user;
+    res.json(safeUser);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -44,11 +45,10 @@ exports.getCandidatesForCompanies = async (req, res) => {
     const candidates = await User.find(
       { role: 'STUDENT' },
       'fullName university department year experienceLevel goal interests location'
-    ).lean();
+    );
 
     res.json({ data: candidates, total: candidates.length });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-// new

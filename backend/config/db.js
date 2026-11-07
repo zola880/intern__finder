@@ -1,17 +1,15 @@
-const mongoose = require('mongoose');
+const { Pool } = require('pg');
 
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
-    console.log('✅ MongoDB connected');
-  } catch (err) {
-    console.error('❌ MongoDB connection error:', err.message);
-    process.exit(1);
-  }
-};
+pool.on('connect', () => {
+  console.log('✅ PostgreSQL connected');
+});
 
-module.exports = connectDB;
+pool.on('error', (err) => {
+  console.error('❌ PostgreSQL idle client error:', err.message);
+});
+
+module.exports = pool;
