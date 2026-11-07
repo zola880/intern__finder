@@ -65,7 +65,7 @@ const Announcement = {
 
   async findById(id) {
     const result = await pool.query(`
-      SELECT a.*, u.full_name AS student_full_name, u.email AS student_email,
+      SELECT a.*, u.full_name AS student_full_name, u.email AS student_email, u.university AS student_university,
              i.company_name, i.field, i.location
       FROM announcements a
       JOIN users u ON a.student_id = u.id
@@ -121,6 +121,7 @@ const Announcement = {
         _id: row.student_id,
         fullName: row.student_full_name,
         email: row.student_email,
+        university: row.student_university,
       },
       studentId: row.student_id,
       internship: {

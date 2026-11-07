@@ -5,6 +5,9 @@ exports.getAllInternships = async (req, res) => {
   try {
     const { search, field, status, page = 1, limit = 10, sort = 'newest' } = req.query;
 
+    const role = req.user ? req.user.role : null;
+    const submittedBy = req.user ? req.user.id : null;
+
     const internships = await Internship.find({
       search,
       field,
@@ -12,8 +15,8 @@ exports.getAllInternships = async (req, res) => {
       page,
       limit,
       sort,
-      role: req.user.role,
-      submittedBy: req.user.id,
+      role,
+      submittedBy,
       approvalStatus: req.query.approvalStatus,
     });
 
@@ -21,8 +24,8 @@ exports.getAllInternships = async (req, res) => {
       search,
       field,
       status,
-      role: req.user.role,
-      submittedBy: req.user.id,
+      role,
+      submittedBy,
       approvalStatus: req.query.approvalStatus,
     });
 
@@ -41,10 +44,10 @@ exports.getInternshipById = async (req, res) => {
     const internship = await Internship.findById(req.params.id);
     if (!internship) return res.status(404).json({ message: 'Not found' });
 
-    if (req.user.role === 'STUDENT' && internship.approvalStatus !== 'APPROVED') {
+    if (req.user && req.user.role === 'STUDENT' && internship.approvalStatus !== 'APPROVED') {
       return res.status(403).json({ message: 'Access denied' });
     }
-    if (req.user.role === 'EMPLOYER' && internship.submittedBy.toString() !== req.user.id.toString()) {
+    if (req.user && req.user.role === 'EMPLOYER' && internship.submittedBy?.id?.toString() !== req.user.id?.toString()) {
       return res.status(403).json({ message: 'Access denied' });
     }
     res.json(internship);
@@ -71,6 +74,7 @@ exports.createInternship = async (req, res) => {
 // @desc    Update internship (owner or admin)
 exports.updateInternship = async (req, res) => {
   try {
+    if (!req.user) return res.status(401).json({ message: 'Authentication required' });
     const internship = await Internship.findById(req.params.id);
     if (!internship) return res.status(404).json({ message: 'Not found' });
 

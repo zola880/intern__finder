@@ -6,8 +6,26 @@ exports.getProfile = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const { passwordHash, refreshToken, ...safeUser } = user;
-    res.json(safeUser);
+    const { password_hash, passwordHash, refresh_token, refreshToken, ...safeUser } = user;
+    // Convert to camelCase
+    const camelUser = {
+      id: safeUser.id,
+      _id: safeUser.id,
+      email: safeUser.email,
+      role: safeUser.role,
+      fullName: safeUser.full_name,
+      department: safeUser.department,
+      university: safeUser.university,
+      year: safeUser.year,
+      experienceLevel: safeUser.experience_level,
+      goal: safeUser.goal,
+      interests: safeUser.interests || [],
+      location: safeUser.location,
+      bankAccount: safeUser.bank_account,
+      createdAt: safeUser.created_at,
+      updatedAt: safeUser.updated_at,
+    };
+    res.json(camelUser);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -28,8 +46,25 @@ exports.updateProfile = async (req, res) => {
     const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const { passwordHash, refreshToken, ...safeUser } = user;
-    res.json(safeUser);
+    const { password_hash, passwordHash, refresh_token, refreshToken, ...safeUser } = user;
+    const camelUser = {
+      id: safeUser.id,
+      _id: safeUser.id,
+      email: safeUser.email,
+      role: safeUser.role,
+      fullName: safeUser.full_name,
+      department: safeUser.department,
+      university: safeUser.university,
+      year: safeUser.year,
+      experienceLevel: safeUser.experience_level,
+      goal: safeUser.goal,
+      interests: safeUser.interests || [],
+      location: safeUser.location,
+      bankAccount: safeUser.bank_account,
+      createdAt: safeUser.created_at,
+      updatedAt: safeUser.updated_at,
+    };
+    res.json(camelUser);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

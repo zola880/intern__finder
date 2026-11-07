@@ -17,7 +17,7 @@ const Internship = {
     let i = 1;
 
     // Role-based visibility
-    if (role === 'STUDENT') {
+    if (role === 'STUDENT' || !role) {
       sql += ` AND i.approval_status = $${i++}`;
       values.push('APPROVED');
     } else if (role === 'EMPLOYER' && submittedBy) {
@@ -69,7 +69,7 @@ const Internship = {
     const values = [];
     let i = 1;
 
-    if (role === 'STUDENT') {
+    if (role === 'STUDENT' || !role) {
       sql += ` AND approval_status = $${i++}`;
       values.push('APPROVED');
     } else if (role === 'EMPLOYER' && submittedBy) {
@@ -193,7 +193,12 @@ const Internship = {
       duration: row.duration,
       deadline: row.deadline,
       website: row.website,
-      submittedBy: row.submitted_by,
+      submittedBy: {
+        id: row.submitted_by,
+        _id: row.submitted_by,
+        fullName: row.submitted_by_name,
+        email: row.submitted_by_email,
+      },
       adminNotes: row.admin_notes,
       approvedAt: row.approved_at,
       createdAt: row.created_at,

@@ -69,9 +69,8 @@ const User = {
       rows = rows.map(row => {
         const obj = {};
         selectFields.split(' ').forEach(f => {
-          const key = f.replace(/_/g, '_');
-          // map camelCase to snake_case for output
-          obj[f] = row[f];
+          const snakeKey = f.replace(/([A-Z])/g, '_$1').toLowerCase();
+          obj[f] = row[snakeKey];
         });
         return obj;
       });

@@ -1,0 +1,91 @@
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+const pool = require('./config/db');
+const bcrypt = require('bcrypt');
+
+// Mock data (same as frontend/src/data/internships.js)
+const INTERNSHIPS = [
+  { companyName: "Safaricom Ethiopia", location: "Addis Ababa", field: "IT", status: "Open", shortDescription: "Join our network engineering team to build the future of connectivity.", fullDescription: "As a Network Engineering Intern at Safaricom Ethiopia, you will work alongside senior engineers to maintain and optimize our core network infrastructure. You will gain hands-on experience with cutting-edge telecommunications technology.", requiredSkills: ["Networking Basics", "Python", "Problem Solving"], duration: "3 Months", deadline: "2026-05-15", website: "https://www.safaricom.et" },
+  { companyName: "Commercial Bank of Ethiopia (CBE)", location: "Addis Ababa", field: "Business", status: "Open", shortDescription: "Explore the world of digital banking and financial services.", fullDescription: "The CBE Digital Banking Internship offers students a chance to understand the intersection of finance and technology. You will assist in customer onboarding for digital products and analyze transaction trends.", requiredSkills: ["Financial Analysis", "Customer Service", "Excel"], duration: "2 Months", deadline: "2026-06-01", website: "https://www.combanketh.et" },
+  { companyName: "Ethiopian Airlines", location: "Bishoftu", field: "Engineering", status: "Open", shortDescription: "Hands-on experience in aircraft maintenance and avionics.", fullDescription: "Join the continent's leading airline in their maintenance hub. This internship provides exposure to aeronautical engineering practices, safety protocols, and advanced avionics systems.", requiredSkills: ["Mechanical Engineering", "Physics", "Attention to Detail"], duration: "6 Months", deadline: "2026-04-30", website: "https://www.ethiopianairlines.com" },
+  { companyName: "Gebeya Inc.", location: "Addis Ababa", field: "IT", status: "Open", shortDescription: "Full-stack development internship in a fast-paced startup environment.", fullDescription: "Work with our product teams to build scalable software solutions. You'll be part of a squad using React, Node.js, and cloud technologies to serve clients across Africa.", requiredSkills: ["JavaScript", "React", "Git"], duration: "4 Months", deadline: "2026-05-20", website: "https://gebeya.com" },
+  { companyName: "Ministry of Innovation and Technology", location: "Addis Ababa", field: "IT", status: "Closed", shortDescription: "Contribute to national digital transformation projects.", fullDescription: "Assist in the development and implementation of e-government services. This role involves data entry, system testing, and technical support for various government bureaus.", requiredSkills: ["Data Management", "Technical Writing", "Basic Programming"], duration: "3 Months", deadline: "2026-03-01", website: "https://www.mint.gov.et" },
+  { companyName: "Ethio Telecom", location: "Addis Ababa", field: "IT", status: "Open", shortDescription: "Work on Ethiopia's largest telecommunications network and digital services.", fullDescription: "Join Ethio Telecom's technology team to support network operations, customer platforms, and digital transformation initiatives across the country.", requiredSkills: ["Telecommunications", "Java", "SQL", "Customer Support"], duration: "4 Months", deadline: "2026-07-10", website: "https://www.ethiotelecom.et" },
+  { companyName: "IceAddis", location: "Addis Ababa", field: "IT", status: "Open", shortDescription: "Startup incubator and tech hub internship for aspiring developers.", fullDescription: "Work with early-stage tech startups at Ethiopia's first innovation hub. You'll help with product development, community events, and developer support.", requiredSkills: ["JavaScript", "React", "UI/UX Design", "Communication"], duration: "3 Months", deadline: "2026-06-15", website: "https://iceaddis.com" },
+  { companyName: "Awash Bank", location: "Addis Ababa", field: "Business", status: "Open", shortDescription: "Gain experience in private banking and financial operations.", fullDescription: "Intern at one of Ethiopia's leading private banks. You'll support customer service, account operations, and financial reporting teams.", requiredSkills: ["Accounting", "Customer Service", "Excel", "Communication"], duration: "3 Months", deadline: "2026-06-20", website: "https://www.awashbank.com" },
+  { companyName: "Dashen Bank", location: "Addis Ababa", field: "Business", status: "Open", shortDescription: "Explore digital banking, loans, and customer relationship management.", fullDescription: "Join Dashen Bank's business team to assist with credit analysis, customer onboarding, and branch operations across Addis Ababa.", requiredSkills: ["Financial Analysis", "Sales", "Excel", "Amharic"], duration: "2 Months", deadline: "2026-07-01", website: "https://www.dashenbanksc.com" },
+  { companyName: "Ethiopia Electric Power", location: "Addis Ababa", field: "Engineering", status: "Open", shortDescription: "Support power generation, transmission, and distribution engineering projects.", fullDescription: "Work alongside electrical engineers on national grid projects, substation maintenance, and renewable energy initiatives.", requiredSkills: ["Electrical Engineering", "Power Systems", "AutoCAD", "Safety Protocols"], duration: "6 Months", deadline: "2026-05-30", website: "https://www.eepco.gov.et" },
+  { companyName: "Meta Abo Brewery", location: "Addis Ababa", field: "Engineering", status: "Open", shortDescription: "Learn beverage production and mechanical maintenance engineering.", fullDescription: "Intern at Meta Abo Brewery to gain hands-on experience in brewing technology, equipment maintenance, and quality control processes.", requiredSkills: ["Mechanical Engineering", "Chemistry", "Quality Control", "Teamwork"], duration: "4 Months", deadline: "2026-06-25", website: "https://www.metaabobrewery.com" },
+  { companyName: "Black Lion Hospital", location: "Addis Ababa", field: "Health", status: "Open", shortDescription: "Clinical internship at Ethiopia's oldest and largest specialized hospital.", fullDescription: "Support doctors and nurses in patient care, medical records, and health department operations at Tikur Anbessa Specialized Hospital.", requiredSkills: ["First Aid", "Medical Terminology", "Patient Care", "Empathy"], duration: "3 Months", deadline: "2026-07-05", website: "https://www.bhs.gov.et" },
+  { companyName: "St. Yared Hospital", location: "Addis Ababa", field: "Health", status: "Open", shortDescription: "Healthcare administration and nursing support internship.", fullDescription: "Work in hospital administration, patient scheduling, and nursing support. Gain exposure to Ethiopia's private healthcare sector.", requiredSkills: ["Health Administration", "Communication", "Microsoft Office", "Organization"], duration: "2 Months", deadline: "2026-06-10", website: "https://www.styaredhospital.com" },
+  { companyName: "Ethiopian Media Authority", location: "Addis Ababa", field: "Other", status: "Open", shortDescription: "Support media regulation, licensing, and content standards work.", fullDescription: "Assist the government body responsible for regulating media houses, issuing press licenses, and monitoring content compliance nationwide.", requiredSkills: ["Writing", "Research", "Public Administration", "Amharic"], duration: "3 Months", deadline: "2026-07-15", website: "https://www.ema.gov.et" },
+  { companyName: "Addis Ababa University", location: "Addis Ababa", field: "Other", status: "Open", shortDescription: "Academic support and research internship at Ethiopia's top university.", fullDescription: "Work with faculty and research centers on academic administration, library services, and student support programs.", requiredSkills: ["Research", "Writing", "Organization", "Computer Literacy"], duration: "4 Months", deadline: "2026-08-01", website: "https://www.aau.edu.et" },
+  { companyName: "United Nations Ethiopia", location: "Addis Ababa", field: "Other", status: "Open", shortDescription: "International development and humanitarian affairs internship.", fullDescription: "Support UN agency operations in Ethiopia including program coordination, reporting, and stakeholder engagement for development projects.", requiredSkills: ["English", "Report Writing", "Project Coordination", "Cross-cultural Communication"], duration: "6 Months", deadline: "2026-07-20", website: "https://ethiopia.un.org" },
+];
+
+async function seed() {
+  try {
+    // Create an admin user to be the submitter
+    const passwordHash = await bcrypt.hash('admin123', 12);
+    const userResult = await pool.query(
+      `INSERT INTO users (email, password_hash, role, full_name)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (email) DO NOTHING
+       RETURNING id`,
+      ['admin@internfinder.com', passwordHash, 'ADMIN', 'System Admin']
+    );
+
+    let adminId;
+    if (userResult.rows.length > 0) {
+      adminId = userResult.rows[0].id;
+      console.log('✅ Admin user created (id:', adminId, ')');
+    } else {
+      const existing = await pool.query("SELECT id FROM users WHERE email = 'admin@internfinder.com'");
+      adminId = existing.rows[0].id;
+      console.log('✅ Admin user already exists (id:', adminId, ')');
+    }
+
+    // Check if internships already seeded
+    const countResult = await pool.query('SELECT COUNT(*) FROM internships');
+    if (parseInt(countResult.rows[0].count) > 0) {
+      console.log(`⚠️  Database already has ${countResult.rows[0].count} internships. Skipping seed.`);
+      console.log('   To re-seed, run: DELETE FROM internships; first.');
+      await pool.end();
+      return;
+    }
+
+    // Insert internships
+    let inserted = 0;
+    for (const internship of INTERNSHIPS) {
+      await pool.query(
+        `INSERT INTO internships
+         (company_name, location, field, status, approval_status, short_description, full_description, required_skills, duration, deadline, website, submitted_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+        [
+          internship.companyName,
+          internship.location,
+          internship.field,
+          internship.status,
+          'APPROVED', // Seed as approved so they show up for guest users
+          internship.shortDescription,
+          internship.fullDescription,
+          internship.requiredSkills,
+          internship.duration,
+          internship.deadline,
+          internship.website,
+          adminId,
+        ]
+      );
+      inserted++;
+    }
+
+    console.log(`✅ Seeded ${inserted} internships (all APPROVED)`);
+    console.log('✅ Admin credentials: admin@internfinder.com / admin123');
+    await pool.end();
+  } catch (err) {
+    console.error('❌ Seed failed:', err.message);
+    await pool.end();
+    process.exit(1);
+  }
+}
+
+seed();

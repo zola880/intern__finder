@@ -11,12 +11,30 @@ const authMiddleware = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    const user = await User.findById(decoded.id).select('-passwordHash -refreshToken');
+    const user = await User.findById(decoded.id);
     if (!user) {
       return res.status(401).json({ message: 'User associated with this token no longer exists.' });
     }
 
-    req.user = user;
+    // Convert to camelCase and remove sensitive fields
+    const { password_hash, passwordHash, refresh_token, refreshToken, ...safeUser } = user;
+    const camelUser = {
+      id: safeUser.id,
+      _id: safeUser.id,
+      email: safeUser.email,
+      role: safeUser.role,
+      fullName: safeUser.full_name,
+      department: safeUser.department,
+      university: safeUser.university,
+      year: safeUser.year,
+      experienceLevel: safeUser.experience_level,
+      goal: safeUser.goal,
+      interests: safeUser.interests || [],
+      location: safeUser.location,
+      bankAccount: safeUser.bank_account,
+    };
+
+    req.user = camelUser;
     next();
   } catch (err) {
     if (err.name === 'JsonWebTokenError') {

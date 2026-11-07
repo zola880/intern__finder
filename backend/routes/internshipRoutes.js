@@ -4,11 +4,13 @@ const internshipController = require('../controllers/internshipController');
 const auth = require('../middleware/auth');
 const roleCheck = require('../middleware/roleCheck');
 
-// All routes require authentication
-router.use(auth);
-
+// GET routes are public (no auth required)
 router.get('/', internshipController.getAllInternships);
 router.get('/:id', internshipController.getInternshipById);
+
+// Mutating routes require authentication
+router.use(auth);
+
 router.post('/', internshipController.createInternship);
 router.put('/:id', internshipController.updateInternship);
 router.delete('/:id', roleCheck('ADMIN'), internshipController.deleteInternship);

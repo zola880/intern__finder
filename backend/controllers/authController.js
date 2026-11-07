@@ -45,7 +45,7 @@ exports.register = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        fullName: user.fullName,
+        fullName: user.full_name,
         role: user.role,
         university: user.university,
         department: user.department,
@@ -70,7 +70,7 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
+    const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) return res.status(401).json({ message: 'Invalid credentials' });
 
     const { accessToken, refreshToken } = generateTokens(user.id);
@@ -82,14 +82,14 @@ exports.login = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        fullName: user.fullName,
+        fullName: user.full_name,
         role: user.role,
         university: user.university,
         department: user.department,
       },
     });
   } catch (err) {
-    console.error('Login error:', err);
+    console.error('LOGIN ERROR:', err && err.message, err && err.stack);
     res.status(500).json({ message: 'Server error during login' });
   }
 };
@@ -105,7 +105,7 @@ exports.refresh = async (req, res) => {
   try {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const user = await User.findById(decoded.id);
-    if (!user || user.refreshToken !== refreshToken) {
+    if (!user || user.refresh_token !== refreshToken) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
     const newAccessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '15m' });
