@@ -104,35 +104,68 @@ const Register = () => {
           required
           className="w-full p-3 border rounded dark:bg-zinc-800 dark:border-zinc-700"
         />
-        
-        {/* University Dropdown */}
-        <select
-          name="university"
-          value={formData.university}
-          onChange={handleChange}
-          required
-          className="w-full p-3 border rounded bg-white dark:bg-zinc-800 dark:border-zinc-700"
-        >
-          <option value="" disabled>Select your university</option>
-          {ethiopianUniversities.map((uni) => (
-            <option key={uni} value={uni}>{uni}</option>
-          ))}
-        </select>
 
-        {/* Department Input with Datalist (suggestions + free text) */}
-        <input
-          list="department-list"
-          name="department"
-          placeholder="Department (e.g., Computer Science)"
-          value={formData.department}
-          onChange={handleChange}
-          className="w-full p-3 border rounded dark:bg-zinc-800 dark:border-zinc-700"
-        />
-        <datalist id="department-list">
-          {departmentSuggestions.map((dept) => (
-            <option key={dept} value={dept} />
-          ))}
-        </datalist>
+        {/* Register as Intern or Host Company */}
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Register as</label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className={`flex items-center gap-2 p-3 border rounded cursor-pointer ${formData.role === 'STUDENT' ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500' : 'border-zinc-200 dark:border-zinc-700 hover:border-indigo-300'}`}>
+              <input
+                type="radio"
+                name="role"
+                value="STUDENT"
+                checked={formData.role === 'STUDENT'}
+                onChange={handleChange}
+                className="w-4 h-4 text-indigo-600"
+              />
+              <span className="text-sm font-medium">Intern (Student)</span>
+            </label>
+            <label className={`flex items-center gap-2 p-3 border rounded cursor-pointer ${formData.role === 'EMPLOYER' ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500' : 'border-zinc-200 dark:border-zinc-700 hover:border-indigo-300'}`}>
+              <input
+                type="radio"
+                name="role"
+                value="EMPLOYER"
+                checked={formData.role === 'EMPLOYER'}
+                onChange={handleChange}
+                className="w-4 h-4 text-indigo-600"
+              />
+              <span className="text-sm font-medium">Host Company (Employer)</span>
+            </label>
+          </div>
+        </div>
+
+        {/* University Dropdown (only for interns) */}
+        {formData.role === 'STUDENT' && (
+          <>
+            <select
+              name="university"
+              value={formData.university}
+              onChange={handleChange}
+              required
+              className="w-full p-3 border rounded bg-white dark:bg-zinc-800 dark:border-zinc-700"
+            >
+              <option value="" disabled>Select your university</option>
+              {ethiopianUniversities.map((uni) => (
+                <option key={uni} value={uni}>{uni}</option>
+              ))}
+            </select>
+
+            {/* Department Input with Datalist (suggestions + free text) */}
+            <input
+              list="department-list"
+              name="department"
+              placeholder="Department (e.g., Computer Science)"
+              value={formData.department}
+              onChange={handleChange}
+              className="w-full p-3 border rounded dark:bg-zinc-800 dark:border-zinc-700"
+            />
+            <datalist id="department-list">
+              {departmentSuggestions.map((dept) => (
+                <option key={dept} value={dept} />
+              ))}
+            </datalist>
+          </>
+        )}
 
         <button
           type="submit"
