@@ -36,15 +36,16 @@ const announcementRoutes = safeRequire('./routes/announcementRoutes', 'announcem
 const aiRoutes = safeRequire('./routes/aiRoutes', 'aiRoutes');
 const adminApplicationRoutes = safeRequire('./routes/adminApplicationRoutes', 'adminApplicationRoutes');
 
-// ✅ CORS – allow localhost + any Vercel preview deployment
+// ✅ CORS – read allowed origins from env, fallback to localhost dev
+const corsOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map(s => s.trim()).filter(Boolean)
+  : ['http://localhost:3000', 'http://localhost:5173'];
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',
-  /\.vercel\.app$/,   // matches any Vercel preview (e.g., project-xxx.vercel.app)
+  ...corsOrigins,
+  /\.vercel\.app$/,
 ];
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
     if (allowedOrigins.some(pattern =>
       typeof pattern === 'string' ? pattern === origin : pattern.test(origin)
@@ -86,7 +87,8 @@ app.get('/', (req, res) => res.send('API is running...'));
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // ✅ DATABASE CONNECTION
-mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 })
+const connectDB = require('./config/db');
+connectDB()
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => {
     console.error('❌ MongoDB error:', err.message);
