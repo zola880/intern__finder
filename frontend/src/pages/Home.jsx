@@ -416,6 +416,9 @@ const Home = () => {
             <Link to="/internships" className="btn btn-outline">
               Browse All Opportunities
             </Link>
+            <Link to="/how-it-works" className="btn btn-outline">
+              How it works
+            </Link>
           </div>
         </div>
       </section>

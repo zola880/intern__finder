@@ -19,6 +19,9 @@ import ApplyUniversityAdmin from "./pages/ApplyUniversityAdmin";
 import AdminApplicationsDashboard from "./pages/AdminApplicationsDashboard";
 import UniversityDashboard from "./pages/UniversityDashboard";
 import MyAnnouncements from "./pages/MyAnnouncements";
+import EmployerApplications from "./pages/EmployerApplications";
+import StudentApplications from "./pages/StudentApplications";
+import HowItWorks from "./pages/HowItWorks";
 
 export default function App() {
   return (
@@ -34,6 +37,7 @@ export default function App() {
               <Route path="/internships/:id" element={<InternshipDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
 
               {/* Protected routes */}
               <Route path="/announce/:id" element={<ProtectedRoute><AnnouncementForm /></ProtectedRoute>} />
@@ -44,6 +48,8 @@ export default function App() {
               <Route path="/admin-applications" element={<ProtectedRoute><AdminApplicationsDashboard /></ProtectedRoute>} />
               <Route path="/university-dashboard" element={<ProtectedRoute><UniversityDashboard /></ProtectedRoute>} />
               <Route path="/my-announcements" element={<ProtectedRoute><MyAnnouncements /></ProtectedRoute>} />
+              <Route path="/my-internship-applications" element={<ProtectedRoute><StudentApplications /></ProtectedRoute>} />
+              <Route path="/company/applications" element={<ProtectedRoute><EmployerApplications /></ProtectedRoute>} />
             </Routes>
           </main>
           <Footer />

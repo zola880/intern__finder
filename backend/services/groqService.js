@@ -1,24 +1,39 @@
 const Groq = require('groq-sdk');
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+let groq;
 
-// Primary model (fast, high quality)
-const PRIMARY_MODEL = 'llama-3.3-70b-versatile';
-// Fallback model (smaller, always available)
-const FALLBACK_MODEL = 'llama3-8b-8192';
+const PRIMARY_MODEL = 'qwen/qwen3.8-27b';
+const FALLBACK_MODEL = 'openai/gpt-oss-20b';
+const VISION_MODEL = 'qwen/qwen3.8-27b';
+
+function getGroqClient() {
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error('GROQ_API_KEY is not configured');
+  }
+  if (!groq) groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  return groq;
+}
 
 async function callGroq(messages, options = {}) {
   const model = options.model || PRIMARY_MODEL;
+  const params = {
+    model,
+    messages,
+    temperature: options.temperature ?? 0.7,
+    max_completion_tokens: options.max_completion_tokens ?? options.max_tokens ?? 800,
+  };
+  if (options.reasoning_effort) {
+    params.reasoning_effort = options.reasoning_effort;
+  } else if (model.includes('gpt-oss')) {
+    params.reasoning_effort = 'low';
+  }
   try {
-    const response = await groq.chat.completions.create({
-      model,
-      messages,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.max_tokens ?? 800,
-    });
-    return response.choices[0].message.content.trim();
+    const response = await getGroqClient().chat.completions.create(params);
+    const content = response.choices[0]?.message?.content;
+    if (typeof content !== 'string' || !content.trim()) {
+      throw new Error('Groq returned an empty response');
+    }
+    return content.trim();
   } catch (error) {
     if (error.status === 404 && model === PRIMARY_MODEL) {
       console.warn(`Primary model ${PRIMARY_MODEL} failed, falling back to ${FALLBACK_MODEL}`);
@@ -28,7 +43,6 @@ async function callGroq(messages, options = {}) {
   }
 }
 
-// Helper: Suggest companies based on user profile and available internships
 async function getCompanySuggestions(userProfile, internships) {
   if (!internships || internships.length === 0) return [];
 
@@ -59,21 +73,20 @@ async function getCompanySuggestions(userProfile, internships) {
 }
 
 async function getChatResponse(userMessage, userProfile, conversationHistory = [], availableInternships = []) {
-  try {
-    let suggestionsText = '';
-    const lowerMsg = userMessage.toLowerCase();
-    const isRecommendationRequest = lowerMsg.includes('company') || lowerMsg.includes('internship') || lowerMsg.includes('suggest') || lowerMsg.includes('recommend');
-    if (isRecommendationRequest && availableInternships.length > 0) {
-      const suggestions = await getCompanySuggestions(userProfile, availableInternships);
-      if (suggestions.length > 0) {
-        suggestionsText = '\n\n🎯 **Based on your profile, here are some internships you might like:**\n';
-        suggestions.forEach((intern, idx) => {
-          suggestionsText += `${idx+1}. **${intern.companyName}** (${intern.field}) – ${intern.location}\n   Skills needed: ${intern.requiredSkills.join(', ')}\n`;
-        });
-      }
+  let suggestionsText = '';
+  const lowerMsg = userMessage.toLowerCase();
+  const isRecommendationRequest = lowerMsg.includes('company') || lowerMsg.includes('internship') || lowerMsg.includes('suggest') || lowerMsg.includes('recommend');
+  if (isRecommendationRequest && availableInternships.length > 0) {
+    const suggestions = await getCompanySuggestions(userProfile, availableInternships);
+    if (suggestions.length > 0) {
+      suggestionsText = '\n\n**Based on your profile, here are some internships you might like:**\n';
+      suggestions.forEach((intern, idx) => {
+        suggestionsText += `${idx + 1}. **${intern.companyName}** (${intern.field}) - ${intern.location}\n   Skills needed: ${(intern.requiredSkills || []).join(', ')}\n`;
+      });
     }
+  }
 
-    const systemPrompt = `You are an AI assistant for **EthioInternAI**, a platform that helps Ethiopian students find internships and get career guidance.
+  const systemPrompt = `You are an AI assistant for **EthioInternAI**, a platform that helps Ethiopian students find internships and get career guidance.
 You are **not human** – you are an AI career assistant.
 Your mission: answer questions about internships, skills, CVs, interviews, and career growth in Ethiopia.
 Always use the user's profile to personalize your answers. Be concise, friendly, and practical.
@@ -91,34 +104,75 @@ If asked about yourself, say: "I'm EthioInternAI's AI assistant, here to help yo
 ${suggestionsText}
 Now answer the user's message.`;
 
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...conversationHistory.map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
-        content: msg.content
-      })),
-      { role: 'user', content: userMessage }
-    ];
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...conversationHistory.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'assistant',
+      content: msg.content
+    })),
+    { role: 'user', content: userMessage }
+  ];
 
-    return await callGroq(messages, { temperature: 0.7, max_tokens: 800 });
-  } catch (error) {
-    console.error('Groq API error:', error);
-    return "I'm having trouble connecting. Please try again later.";
-  }
+  return callGroq(messages, { temperature: 0.7, max_tokens: 800 });
+}
+
+async function getVisionResponse(userMessage, imageBase64, userProfile, conversationHistory = []) {
+  const dataUrl = imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
+  const systemPrompt = `You are an AI assistant for **EthioInternAI**. The user shared an image. Analyze it and answer their question. Be concise and helpful.`;
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...conversationHistory.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'assistant',
+      content: msg.content
+    })),
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: userMessage || 'What is in this image?' },
+        { type: 'image_url', image_url: { url: dataUrl } }
+      ]
+    }
+  ];
+  return callGroq(messages, { model: VISION_MODEL, temperature: 0.7, max_tokens: 800 });
+}
+
+async function transcribeAudio(fileBuffer, filename = 'audio.webm') {
+  const { toFile } = require('groq-sdk');
+  const mimeType = filename.endsWith('.mp4') || filename.endsWith('.m4a') ? 'audio/mp4'
+    : filename.endsWith('.ogg') ? 'audio/ogg'
+      : filename.endsWith('.wav') ? 'audio/wav'
+        : filename.endsWith('.mp3') ? 'audio/mpeg' : 'audio/webm';
+  const file = await toFile(fileBuffer, filename, { type: mimeType });
+  const response = await getGroqClient().audio.transcriptions.create({
+    file,
+    model: 'whisper-large-v3-turbo',
+  });
+  return response.text || '';
+}
+
+async function textToSpeech(text) {
+  const response = await getGroqClient().audio.speech.create({
+    model: 'canopylabs/orpheus-v1-english',
+    input: text,
+    voice: 'troy',
+    response_format: 'wav',
+  });
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 }
 
 async function generateCV(userProfile, tone = 'professional') {
   const prompt = `Generate a ${tone} CV for a student named ${userProfile.fullName || 'Student'}.
 
-📚 **Education**: ${userProfile.department || 'Field of study'} at ${userProfile.university || 'University'}, Year ${userProfile.year || '?'}
-💡 **Experience Level**: ${userProfile.experienceLevel || 'Beginner'}
-🎯 **Interests & Skills**: ${userProfile.interests?.join(', ') || 'Not specified'}
-🏆 **Career Goal**: ${userProfile.goal || 'Seeking an internship to gain practical experience'}
+Education: ${userProfile.department || 'Field of study'} at ${userProfile.university || 'University'}, Year ${userProfile.year || '?'}
+Experience Level: ${userProfile.experienceLevel || 'Beginner'}
+Interests and Skills: ${userProfile.interests?.join(', ') || 'Not specified'}
+Career Goal: ${userProfile.goal || 'Seeking an internship to gain practical experience'}
 
 Format the CV with these sections:
 - Contact Information (email, phone, location)
 - Education
-- Skills (technical & soft)
+- Skills (technical and soft)
 - Projects / Experience (if any)
 - Extracurricular Activities
 - References
@@ -147,6 +201,9 @@ async function generateInterviewQuestions(internship, count = 5) {
 
 module.exports = {
   getChatResponse,
+  getVisionResponse,
+  transcribeAudio,
+  textToSpeech,
   generateCV,
   generateCoverLetter,
   generateInterviewQuestions,

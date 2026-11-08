@@ -116,7 +116,7 @@ const Internship = {
   // Create
   async create(data) {
     const {
-      companyName, companyLogoUrl, location, field, status = 'Open',
+      companyName, companyLogoUrl, applicationFormUrl, location, field, status = 'Open',
       approvalStatus = 'PENDING', shortDescription, fullDescription,
       requiredSkills = [], duration, deadline, website, submittedBy,
       adminNotes
@@ -124,13 +124,13 @@ const Internship = {
 
     const result = await pool.query(`
       INSERT INTO internships
-      (company_name, company_logo_url, location, field, status, approval_status,
+      (company_name, company_logo_url, application_form_url, location, field, status, approval_status,
        short_description, full_description, required_skills, duration, deadline,
        website, submitted_by, admin_notes)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
       RETURNING *
     `, [
-      companyName, companyLogoUrl, location, field, status, approvalStatus,
+      companyName, companyLogoUrl, applicationFormUrl, location, field, status, approvalStatus,
       shortDescription, fullDescription, requiredSkills, duration, deadline,
       website, submittedBy, adminNotes
     ]);
@@ -140,7 +140,7 @@ const Internship = {
   // Find by id and update
   async findByIdAndUpdate(id, updates, options = {}) {
     const allowedCols = [
-      'company_name', 'company_logo_url', 'location', 'field', 'status',
+      'company_name', 'company_logo_url', 'application_form_url', 'location', 'field', 'status',
       'approval_status', 'short_description', 'full_description', 'required_skills',
       'duration', 'deadline', 'website', 'admin_notes', 'approved_at'
     ];
@@ -183,6 +183,7 @@ const Internship = {
       _id: row.id,
       companyName: row.company_name,
       companyLogoUrl: row.company_logo_url,
+      applicationFormUrl: row.application_form_url,
       location: row.location,
       field: row.field,
       status: row.status,

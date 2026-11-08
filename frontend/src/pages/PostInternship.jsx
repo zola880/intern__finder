@@ -1,13 +1,15 @@
-import React, { useState } from 'react';// New page for companies to post internships
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Briefcase, MapPin, Calendar, Clock, ExternalLink, CheckCircle2, Building2, Users, Sparkles, Loader2 } from 'lucide-react';
+import { Briefcase, MapPin, Calendar, Clock, ExternalLink, CheckCircle2, Building2, Users, Sparkles, Loader2, FileText, ImagePlus, X } from 'lucide-react';
 import api from '../services/api';
 import { useProfile } from '../hooks/useProfile';
 
 const PostInternship = () => {
   const { user } = useProfile();
   const navigate = useNavigate();
+  const logoInputRef = useRef(null);
+  const applicationFormInputRef = useRef(null);
   const [form, setForm] = useState({
     companyName: '',
     location: '',
@@ -19,6 +21,8 @@ const PostInternship = () => {
     deadline: '',
     website: '',
   });
+  const [companyLogo, setCompanyLogo] = useState(null);
+  const [applicationForm, setApplicationForm] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -26,13 +30,42 @@ const PostInternship = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleUpload = (event, type) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Uploads must be 5 MB or smaller.');
+      return;
+    }
+    if (type === 'logo' && !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError('Company logo must be a JPG, PNG, or WebP image.');
+      return;
+    }
+    if (type === 'applicationForm' && file.type !== 'application/pdf') {
+      setError('Application form must be a PDF.');
+      return;
+    }
+    setError('');
+    if (type === 'logo') setCompanyLogo(file);
+    else setApplicationForm(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      const skillsArray = form.requiredSkills.split(',').map(s => s.trim());
-      await api.post('/internships', { ...form, requiredSkills: skillsArray });
+      const payload = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        if (key !== 'requiredSkills' && value) payload.append(key, value);
+      });
+      payload.append('requiredSkills', form.requiredSkills);
+      if (companyLogo) payload.append('companyLogo', companyLogo);
+      if (applicationForm) payload.append('applicationForm', applicationForm);
+      await api.post('/internships', payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       alert('Internship submitted for admin approval.');
       navigate('/internships');
     } catch (err) {
@@ -56,6 +89,15 @@ const PostInternship = () => {
         >
           Go to Login
         </button>
+      </div>
+    );
+  }
+
+  if (!['EMPLOYER', 'ADMIN'].includes(user.role)) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-24 text-center">
+        <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Host company account required</h2>
+        <p className="text-zinc-600 dark:text-zinc-400">Only host companies can post internships. Sign in with an employer account to continue.</p>
       </div>
     );
   }
@@ -177,9 +219,39 @@ const PostInternship = () => {
                 placeholder="https://company.com/careers"
                 value={form.website}
                 onChange={handleChange}
-                required
                 className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
               />
+            </div>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
+                <ImagePlus className="w-4 h-4" />
+                Company logo <span className="font-normal text-zinc-400">(optional)</span>
+              </label>
+              <input ref={logoInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={event => handleUpload(event, 'logo')} />
+              <div className="flex items-center gap-3 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 p-3">
+                <ImagePlus className="h-8 w-8 shrink-0 text-indigo-500" />
+                <span className="min-w-0 flex-1 truncate text-sm text-zinc-500 dark:text-zinc-400">{companyLogo?.name || 'JPG, PNG, or WebP · max 5 MB'}</span>
+                <button type="button" onClick={() => logoInputRef.current?.click()} className="shrink-0 rounded-lg bg-zinc-100 px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-indigo-50 hover:text-indigo-700 dark:bg-zinc-800 dark:text-zinc-200">Choose image</button>
+                {companyLogo && <button type="button" aria-label="Remove company logo" onClick={() => setCompanyLogo(null)} className="p-1 text-zinc-400 hover:text-red-500"><X className="h-4 w-4" /></button>}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Application form <span className="font-normal text-zinc-400">(optional PDF)</span>
+              </label>
+              <input ref={applicationFormInputRef} type="file" accept="application/pdf,.pdf" className="hidden" onChange={event => handleUpload(event, 'applicationForm')} />
+              <div className="flex items-center gap-3 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 p-3">
+                <FileText className="h-8 w-8 shrink-0 text-indigo-500" />
+                <span className="min-w-0 flex-1 truncate text-sm text-zinc-500 dark:text-zinc-400">{applicationForm?.name || 'PDF document · max 5 MB'}</span>
+                <button type="button" onClick={() => applicationFormInputRef.current?.click()} className="shrink-0 rounded-lg bg-zinc-100 px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-indigo-50 hover:text-indigo-700 dark:bg-zinc-800 dark:text-zinc-200">Choose PDF</button>
+                {applicationForm && <button type="button" aria-label="Remove application form" onClick={() => setApplicationForm(null)} className="p-1 text-zinc-400 hover:text-red-500"><X className="h-4 w-4" /></button>}
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">Interns can download this form; they submit their application and CV securely on EthioInternAI.</p>
             </div>
           </div>
 

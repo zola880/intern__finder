@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { MapPin, Briefcase, Calendar, ChevronRight, Bookmark } from "lucide-react";
 import { useProfile } from "../hooks/useProfile";
 import api from "../services/api";
+import { getFileUrl } from "../utils/fileUrl";
 
 const InternshipCard = ({ internship }) => {
   const { user } = useProfile();
@@ -52,9 +53,13 @@ const InternshipCard = ({ internship }) => {
       <div className="p-4 sm:p-5 md:p-6">
         <div className="flex justify-between items-start gap-2 mb-3">
           <div className="flex items-center gap-3 flex-1">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center font-bold text-indigo-600 text-base sm:text-lg">
-              {internship.companyName?.charAt(0) || "?"}
-            </div>
+            {internship.companyLogoUrl ? (
+              <img src={getFileUrl(internship.companyLogoUrl)} alt={`${internship.companyName} logo`} className="h-10 w-10 rounded-xl object-cover sm:h-12 sm:w-12" />
+            ) : (
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center font-bold text-indigo-600 text-base sm:text-lg">
+                {internship.companyName?.charAt(0) || "?"}
+              </div>
+            )}
             <div>
               <h3 className="font-bold text-base sm:text-lg text-zinc-900 dark:text-white group-hover:text-indigo-600 transition-colors">
                 {internship.companyName}

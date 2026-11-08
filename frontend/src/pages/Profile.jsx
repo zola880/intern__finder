@@ -208,9 +208,18 @@ const Profile = () => {
               onClick={() => navigate("/my-announcements")}
               className="w-full flex items-center justify-between p-3 rounded-xl text-sm font-medium hover:bg-white dark:hover:bg-zinc-800 transition-all text-zinc-600 dark:text-zinc-400"
             >
-              My Applications
+              My Internship Announcements
               <ChevronRight className="w-4 h-4" />
             </button>
+            {user.role === "STUDENT" && (
+              <button
+                onClick={() => navigate("/my-internship-applications")}
+                className="w-full flex items-center justify-between p-3 rounded-xl text-sm font-medium hover:bg-white dark:hover:bg-zinc-800 transition-all text-zinc-600 dark:text-zinc-400"
+              >
+                Job Applications
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
             <button 
               onClick={() => {
                 const savedSection = document.getElementById("saved-internships");

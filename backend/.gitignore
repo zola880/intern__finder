@@ -1,6 +1,7 @@
 node_modules/
 .env
 uploads/
+private_uploads/
 *.log
 dist/
 build/

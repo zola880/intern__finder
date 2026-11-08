@@ -6,7 +6,6 @@ const ProfileContext = createContext();
 
 export const ProfileProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,18 +23,10 @@ export const ProfileProvider = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    if (isDarkMode) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-  }, [isDarkMode]);
-
   const updateProfile = async (updates) => {
     const { data } = await api.put('/profile', updates);
     setUser(data);
   };
-
-  const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 
   const setAuth = (userData) => setUser(userData);
 
@@ -46,7 +37,7 @@ export const ProfileProvider = ({ children }) => {
   };
 
   return (
-    <ProfileContext.Provider value={{ user, updateProfile, isDarkMode, toggleDarkMode, setAuth, logout, loading }}>
+    <ProfileContext.Provider value={{ user, updateProfile, setAuth, logout, loading }}>
       {children}
     </ProfileContext.Provider>
   );

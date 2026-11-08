@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 const app = express();
 
@@ -33,6 +34,7 @@ const internshipRoutes = safeRequire('./routes/internshipRoutes', 'internshipRou
 const savedRoutes = safeRequire('./routes/savedRoutes', 'savedRoutes');
 const announcementRoutes = safeRequire('./routes/announcementRoutes', 'announcementRoutes');
 const aiRoutes = safeRequire('./routes/aiRoutes', 'aiRoutes');
+const applicationRoutes = safeRequire('./routes/applicationRoutes', 'applicationRoutes');
 const adminApplicationRoutes = safeRequire('./routes/adminApplicationRoutes', 'adminApplicationRoutes');
 
 // ✅ CORS – read allowed origins from env, fallback to localhost dev
@@ -66,7 +68,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ STATIC FILES
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(process.env.UPLOADS_DIR || path.join(__dirname, 'uploads'), {
+  setHeaders(res) {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  },
+}));
 
 // ✅ RATE LIMITING
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
@@ -79,6 +85,7 @@ app.use('/api/internships', internshipRoutes);
 app.use('/api/saved', savedRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/applications', applicationRoutes);
 app.use('/api/admin-applications', adminApplicationRoutes);
 
 // ✅ HEALTH CHECKS

@@ -1,4 +1,8 @@
 const Internship = require('../models/Internship');
+const {
+  removePublicInternshipFile,
+  savePublicInternshipFile,
+} = require('../services/applicationFileStorage');
 
 // @desc    Get all internships (filtered by role)
 exports.getAllInternships = async (req, res) => {
@@ -56,17 +60,46 @@ exports.getInternshipById = async (req, res) => {
   }
 };
 
-// @desc    Create internship (any authenticated user)
+// @desc    Create internship (host company or administrator)
 exports.createInternship = async (req, res) => {
+  const savedUploads = [];
   try {
     const { role } = req.user;
+    let requiredSkills = req.body.requiredSkills || [];
+    if (typeof requiredSkills === 'string') {
+      try {
+        requiredSkills = JSON.parse(requiredSkills);
+      } catch {
+        requiredSkills = requiredSkills.split(',');
+      }
+    }
+    if (!Array.isArray(requiredSkills)) {
+      return res.status(400).json({ message: 'Required skills must be a list' });
+    }
+
+    const uploads = req.files || {};
+    let companyLogoUrl;
+    let applicationFormUrl;
+    if (uploads.companyLogo?.[0]) {
+      companyLogoUrl = await savePublicInternshipFile(uploads.companyLogo[0]);
+      savedUploads.push(companyLogoUrl);
+    }
+    if (uploads.applicationForm?.[0]) {
+      applicationFormUrl = await savePublicInternshipFile(uploads.applicationForm[0]);
+      savedUploads.push(applicationFormUrl);
+    }
+
     const internship = await Internship.create({
       ...req.body,
+      requiredSkills: requiredSkills.map(skill => String(skill).trim()).filter(Boolean),
+      companyLogoUrl,
+      applicationFormUrl,
       submittedBy: req.user.id,
       approvalStatus: role === 'ADMIN' ? 'APPROVED' : 'PENDING',
     });
     res.status(201).json(internship);
   } catch (err) {
+    await Promise.all(savedUploads.map(removePublicInternshipFile));
     res.status(400).json({ message: err.message });
   }
 };
